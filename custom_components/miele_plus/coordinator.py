@@ -38,6 +38,7 @@ from .const import (
     EVENT_PROGRAM_PAUSED,
     EVENT_PROGRAM_RESUMED,
     EVENT_PROGRAM_STARTED,
+    FILLING_LEVELS_INTERVAL,
     HEALTHY_PUSH_POLL_INTERVAL,
     PROGRAM_TYPES,
     SIGNAL_DEVICE_EVENT,
@@ -84,6 +85,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
         self._actions_dirty: set[str] = set()
         self._actions_task: asyncio.Task | None = None
         self._programs_tried: dict[str, float] = {}
+        self._filling_next = 0.0
         self.stats: dict[str, int] = {
             "polls": 0,
             "poll_errors": 0,
@@ -134,6 +136,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
 
         devices = self._merge_devices(raw, full=True)
         await self._refresh_actions(devices)
+        await self._refresh_filling_levels(devices)
         self._mark_success()
         self._adjust_interval(devices)
         self._schedule_program_loading(devices)
@@ -185,6 +188,28 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             dev.actions = result
             dev.actions_updated = time.monotonic()
             self._actions_dirty.discard(dev.serial)
+
+    async def _refresh_filling_levels(self, devices: dict[str, MieleDevice]) -> None:
+        """Fetch consumable levels (not pushed by the stream) with their own cadence."""
+        if time.monotonic() < self._filling_next:
+            return
+        try:
+            levels = await self.api.get_filling_levels()
+        except MieleAuthError as err:
+            raise ConfigEntryAuthFailed(str(err)) from err
+        except MieleRequestError as err:
+            # Not supported for this account/devices: try again much later
+            _LOGGER.debug("Filling levels not available: %s", err)
+            self._filling_next = time.monotonic() + 6 * 3600
+            return
+        except MieleApiError as err:
+            _LOGGER.debug("Could not fetch filling levels: %s", err)
+            self._filling_next = time.monotonic() + 60
+            return
+        self._filling_next = time.monotonic() + FILLING_LEVELS_INTERVAL
+        for serial, values in levels.items():
+            if (dev := devices.get(serial)) is not None:
+                dev.filling_levels = values
 
     @callback
     def _schedule_actions_refresh(self) -> None:
@@ -281,6 +306,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             elif new_status == MieleStatus.PAUSE and old_status == MieleStatus.RUNNING:
                 events.append((EVENT_PROGRAM_PAUSED, {}))
             elif new_status == MieleStatus.PROGRAM_ENDED and old_status in active:
+                self._filling_next = 0.0
                 events.append(
                     (
                         EVENT_PROGRAM_FINISHED,

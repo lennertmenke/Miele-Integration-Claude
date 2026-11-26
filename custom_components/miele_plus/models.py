@@ -63,6 +63,7 @@ class MieleDevice:
     actions_updated: float = 0.0
     programs: list[dict[str, Any]] = field(default_factory=list)
     programs_loaded: bool = False
+    filling_levels: dict[str, Any] = field(default_factory=dict)
 
     # ------------------------------------------------------------- ident
 
@@ -326,6 +327,10 @@ class MieleDevice:
                 except (KeyError, TypeError, ValueError):
                     return None
         return None
+
+    def filling_level(self, key: str) -> int | float | None:
+        value = self.filling_levels.get(key)
+        return value if isinstance(value, int | float) and not isinstance(value, bool) else None
 
     @property
     def actions_age(self) -> float:

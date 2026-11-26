@@ -15,6 +15,14 @@ OAUTH2_TOKEN: Final = (
     "https://auth.domestic.miele-iot.com/partner/realms/mcs/protocol/openid-connect/token"
 )
 API_BASE: Final = "https://api.mcs3.miele.com/v1"
+OAUTH2_SCOPES: Final = (
+    "openid",
+    "mcs_thirdparty_read",
+    "mcs_thirdparty_write",
+    "mcs_thirdparty_media",
+)
+# Filling levels are not part of the event stream; refresh them this often (s)
+FILLING_LEVELS_INTERVAL: Final = 600
 
 # Options
 CONF_LANGUAGE: Final = "language"

@@ -203,6 +203,18 @@ class MieleApi:
         data = await self.request("GET", f"/devices/{device_id}/actions")
         return data if isinstance(data, dict) else {}
 
+    async def get_filling_levels(self) -> dict[str, dict[str, Any]]:
+        """Return consumable filling levels (TwinDos, salt, ...) keyed by serial."""
+        data = await self.request("GET", "/devices/fillingLevels", retries=1)
+        result: dict[str, dict[str, Any]] = {}
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict) and isinstance(item.get("fillingLevels"), dict):
+                    result[str(item.get("deviceId"))] = item["fillingLevels"]
+        elif isinstance(data, dict):
+            result = {k: v for k, v in data.items() if isinstance(v, dict)}
+        return result
+
     async def get_programs(self, device_id: str) -> list[dict[str, Any]]:
         """Return the programs that can be started remotely."""
         data = await self.request("GET", f"/devices/{device_id}/programs", retries=1)
@@ -236,7 +248,7 @@ class MieleApi:
         refreshed = False
         while True:
             headers = await self._headers()
-            headers["Accept"] = "text/event-stream"
+            headers["Accept"] = "text/event-stream; char-set=utf-8"
             headers["Accept-Language"] = self.language
             timeout = aiohttp.ClientTimeout(total=None, sock_connect=30, sock_read=watchdog)
             try:

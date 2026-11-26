@@ -133,6 +133,27 @@
       "plate": {
         "name": "Kochzone {plate}"
       },
+      "twin_dos_1_level": {
+        "name": "TwinDos 1 Füllstand"
+      },
+      "twin_dos_2_level": {
+        "name": "TwinDos 2 Füllstand"
+      },
+      "power_disc_level": {
+        "name": "PowerDisk Füllstand"
+      },
+      "salt_level": {
+        "name": "Salz Füllstand"
+      },
+      "rinse_aid_level": {
+        "name": "Klarspüler Füllstand"
+      },
+      "coal_filter_saturation": {
+        "name": "Aktivkohlefilter Sättigung"
+      },
+      "fat_filter_saturation": {
+        "name": "Fettfilter Sättigung"
+      },
       "last_update": {
         "name": "Letzte Aktualisierung"
       },

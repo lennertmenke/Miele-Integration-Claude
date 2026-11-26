@@ -34,6 +34,7 @@ async def test_full_flow(
     assert result["type"] is FlowResultType.EXTERNAL_STEP
     assert result["url"].startswith(f"{OAUTH2_AUTHORIZE}?response_type=code&client_id=cid")
     assert "vg=" in result["url"]
+    assert "scope=openid+mcs_thirdparty_read+mcs_thirdparty_write" in result["url"]
 
     client = await hass_client_no_auth()
     resp = await client.get(f"/auth/external/callback?code=abcd&state={state}")

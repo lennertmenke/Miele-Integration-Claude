@@ -129,6 +129,18 @@ def mock_api(devices: dict[str, Any]) -> Generator[dict[str, AsyncMock]]:
                 ]
             ),
         ) as get_programs,
+        patch(
+            f"{base}.get_filling_levels",
+            AsyncMock(
+                return_value={
+                    SERIAL_WM: {
+                        "twinDosContainer1FillingLevel": 68,
+                        "twinDosContainer2FillingLevel": 61,
+                        "saltFillingLevel": None,
+                    }
+                }
+            ),
+        ),
         patch(f"{base}.send_action", AsyncMock(return_value=None)) as send_action,
         patch(f"{base}.start_program", AsyncMock(return_value=None)) as start_program,
     ):

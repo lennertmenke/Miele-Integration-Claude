@@ -43,6 +43,9 @@ async def test_setup_creates_entities(
     assert _state(hass, "switch.kuche_supercool") in ("off", "on")
     assert _state(hass, "sensor.waschmaschine_finish_time") != "unknown"
     assert _state(hass, "sensor.waschmaschine_update_mode") == "polling"
+    assert _state(hass, "sensor.waschmaschine_twindos_1_level") == "68"
+    assert _state(hass, "sensor.waschmaschine_twindos_2_level") == "61"
+    assert hass.states.get("sensor.waschmaschine_salt_level") is None
 
 
 async def test_push_event_transitions_and_totals(

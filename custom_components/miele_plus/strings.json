@@ -133,6 +133,27 @@
       "plate": {
         "name": "Cooking zone {plate}"
       },
+      "twin_dos_1_level": {
+        "name": "TwinDos 1 level"
+      },
+      "twin_dos_2_level": {
+        "name": "TwinDos 2 level"
+      },
+      "power_disc_level": {
+        "name": "PowerDisk level"
+      },
+      "salt_level": {
+        "name": "Salt level"
+      },
+      "rinse_aid_level": {
+        "name": "Rinse aid level"
+      },
+      "coal_filter_saturation": {
+        "name": "Charcoal filter saturation"
+      },
+      "fat_filter_saturation": {
+        "name": "Grease filter saturation"
+      },
       "last_update": {
         "name": "Last update"
       },

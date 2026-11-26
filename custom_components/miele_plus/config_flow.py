@@ -35,6 +35,7 @@ from .const import (
     DEFAULT_STALE_GRACE,
     DEFAULT_USE_PUSH,
     DOMAIN,
+    OAUTH2_SCOPES,
 )
 from .coordinator import MieleConfigEntry
 
@@ -68,10 +69,13 @@ class MieleFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domai
 
     @property
     def extra_authorize_data(self) -> dict[str, Any]:
-        """Miele requires the 'vg' (country/language) parameter."""
+        """Miele requires the OAuth scopes and the 'vg' (country/language) parameter."""
         language = self.hass.config.language or "en"
         country = self.hass.config.country or "DE"
-        return {"vg": f"{language.split('-')[0]}-{country}"}
+        return {
+            "scope": " ".join(OAUTH2_SCOPES),
+            "vg": f"{language.split('-')[0]}-{country}",
+        }
 
     async def async_oauth_create_entry(self, data: dict[str, Any]) -> ConfigFlowResult:
         """Create or update the entry after successful authorization."""

@@ -201,6 +201,28 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
 )
 
+FILLING_SENSORS: tuple[MieleSensorDescription, ...] = tuple(
+    MieleSensorDescription(
+        key=key,
+        translation_key=key,
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=category,
+        exists_fn=lambda d, raw=raw: d.filling_level(raw) is not None,
+        value_fn=lambda d, raw=raw: d.filling_level(raw),
+        always_available=True,
+    )
+    for key, raw, category in (
+        ("twin_dos_1_level", "twinDosContainer1FillingLevel", None),
+        ("twin_dos_2_level", "twinDosContainer2FillingLevel", None),
+        ("power_disc_level", "powerDiscFillingLevel", None),
+        ("salt_level", "saltFillingLevel", None),
+        ("rinse_aid_level", "rinseAidFillingLevel", None),
+        ("coal_filter_saturation", "coalFilterSaturation", EntityCategory.DIAGNOSTIC),
+        ("fat_filter_saturation", "fatFilterSaturation", EntityCategory.DIAGNOSTIC),
+    )
+)
+
 TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
     MieleSensorDescription(
         key="energy_total",
@@ -287,6 +309,9 @@ async def async_setup_entry(
 
     def _factory(dev: MieleDevice) -> Iterable[MieleEntity]:
         for desc in SENSORS:
+            if desc.exists_fn(dev):
+                yield MieleSensor(coordinator, dev.serial, desc)
+        for desc in FILLING_SENSORS:
             if desc.exists_fn(dev):
                 yield MieleSensor(coordinator, dev.serial, desc)
         for desc in TOTAL_SENSORS:
