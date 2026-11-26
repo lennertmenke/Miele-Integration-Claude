@@ -38,7 +38,7 @@
           "use_push": "Push-Updates verwenden (Event-Stream)",
           "poll_interval": "Abfrageintervall ohne Push",
           "stale_grace": "Letzten Zustand bei Cloud-Fehlern behalten für",
-          "power_off_on_finish": "Wasch-/Trocken-/Spülmaschine nach Programmende ausschalten (stoppt den Signalton)",
+          "power_off_on_finish": "Waschmaschine nach Programmende ausschalten (stoppt den Signalton)",
           "power_off_delay": "Verzögerung bis zum Ausschalten"
         },
         "data_description": {
@@ -95,20 +95,8 @@
       "spin_speed": {
         "name": "Schleuderdrehzahl"
       },
-      "drying_step": {
-        "name": "Trockenstufe"
-      },
       "target_temperature": {
         "name": "Zieltemperatur"
-      },
-      "core_temperature": {
-        "name": "Kerntemperatur"
-      },
-      "core_target_temperature": {
-        "name": "Kern-Zieltemperatur"
-      },
-      "ventilation_step": {
-        "name": "Lüfterstufe"
       },
       "energy_consumption": {
         "name": "Energie (Programm)"
@@ -128,35 +116,11 @@
       "water_total": {
         "name": "Wasser gesamt"
       },
-      "temperature": {
-        "name": "Temperatur"
-      },
-      "temperature_zone": {
-        "name": "Temperatur Zone {zone}"
-      },
-      "plate": {
-        "name": "Kochzone {plate}"
-      },
       "twin_dos_1_level": {
         "name": "TwinDos 1 Füllstand"
       },
       "twin_dos_2_level": {
         "name": "TwinDos 2 Füllstand"
-      },
-      "power_disc_level": {
-        "name": "PowerDisk Füllstand"
-      },
-      "salt_level": {
-        "name": "Salz Füllstand"
-      },
-      "rinse_aid_level": {
-        "name": "Klarspüler Füllstand"
-      },
-      "coal_filter_saturation": {
-        "name": "Aktivkohlefilter Sättigung"
-      },
-      "fat_filter_saturation": {
-        "name": "Fettfilter Sättigung"
       },
       "last_update": {
         "name": "Letzte Aktualisierung"
@@ -176,12 +140,8 @@
           "idle": "Bereit",
           "rinse_hold": "Spülstopp",
           "service": "Service",
-          "superfreezing": "SuperFrost",
-          "supercooling": "SuperKühlen",
-          "superheating": "Superheizen",
           "default": "Standard",
           "locked": "Gesperrt",
-          "supercooling_superfreezing": "SuperKühlen & SuperFrost",
           "not_connected": "Nicht verbunden",
           "unknown": "Unbekannt"
         }
@@ -228,36 +188,11 @@
     "switch": {
       "power": {
         "name": "Ein/Aus"
-      },
-      "superfreezing": {
-        "name": "SuperFrost"
-      },
-      "supercooling": {
-        "name": "SuperKühlen"
-      }
-    },
-    "light": {
-      "light": {
-        "name": "Beleuchtung"
-      },
-      "ambient_light": {
-        "name": "Ambientebeleuchtung"
-      }
-    },
-    "number": {
-      "target_temperature": {
-        "name": "Zieltemperatur"
-      },
-      "target_temperature_zone": {
-        "name": "Zieltemperatur Zone {zone}"
       }
     },
     "select": {
       "program_select": {
         "name": "Programm starten"
-      },
-      "ventilation_select": {
-        "name": "Lüfterstufe"
       }
     },
     "event": {
@@ -311,11 +246,11 @@
         },
         "temperature": {
           "name": "Temperatur",
-          "description": "Zieltemperatur (Backöfen)."
+          "description": "Waschtemperatur (falls unterstützt)."
         },
         "duration": {
           "name": "Dauer",
-          "description": "Programmdauer (Backöfen)."
+          "description": "Programmdauer (falls unterstützt)."
         },
         "start_delay": {
           "name": "Startvorwahl",

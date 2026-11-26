@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN, PROGRAM_TYPES, DeviceType
+from .const import DOMAIN
 from .coordinator import MieleConfigEntry
 from .entity import MieleEntity, MieleEntityDescription, async_setup_device_entities
 from .models import MieleDevice
@@ -17,9 +17,6 @@ from .models import MieleDevice
 PARALLEL_UPDATES = 1
 
 PROGRAM_DESCRIPTION = MieleEntityDescription(key="program_select", translation_key="program_select")
-VENTILATION_DESCRIPTION = MieleEntityDescription(
-    key="ventilation_select", translation_key="ventilation_select"
-)
 
 
 async def async_setup_entry(
@@ -31,10 +28,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
 
     def _factory(dev: MieleDevice) -> Iterable[MieleEntity]:
-        if dev.type_raw in PROGRAM_TYPES:
-            yield MieleProgramSelect(coordinator, dev.serial, PROGRAM_DESCRIPTION)
-        if dev.type_raw == DeviceType.HOOD:
-            yield MieleVentilationSelect(coordinator, dev.serial, VENTILATION_DESCRIPTION)
+        yield MieleProgramSelect(coordinator, dev.serial, PROGRAM_DESCRIPTION)
 
     async_setup_device_entities(coordinator, entry, async_add_entities, _factory)
 
@@ -84,32 +78,3 @@ class MieleProgramSelect(MieleEntity, SelectEntity):
             translation_key="unknown_program",
             translation_placeholders={"program": option},
         )
-
-
-class MieleVentilationSelect(MieleEntity, SelectEntity):
-    """Fan level of a hood."""
-
-    @property
-    def available(self) -> bool:
-        """Available when steps are offered."""
-        return super().available and bool(self.device.actions.get("ventilationStep"))
-
-    @property
-    def options(self) -> list[str]:
-        """Available steps."""
-        steps = self.device.actions.get("ventilationStep") or []
-        options = [str(step) for step in steps]
-        current = self.device.ventilation_step
-        if current is not None and str(current) not in options:
-            options.insert(0, str(current))
-        return options or ["0"]
-
-    @property
-    def current_option(self) -> str | None:
-        """Current step."""
-        step = self.device.ventilation_step
-        return None if step is None else str(step)
-
-    async def async_select_option(self, option: str) -> None:
-        """Set the fan level."""
-        await self.coordinator.async_send_action(self._serial, {"ventilationStep": int(option)})

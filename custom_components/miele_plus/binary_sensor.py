@@ -14,14 +14,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import (
-    ACTIVE_STATES,
-    COOLING_TYPES,
-    DISHWASHER_TYPES,
-    LAUNDRY_TYPES,
-    OVEN_TYPES,
-    PROGRAM_TYPES,
-)
+from .const import ACTIVE_STATES
 from .coordinator import MieleConfigEntry
 from .entity import MieleEntity, MieleEntityDescription, async_setup_device_entities
 from .models import MieleDevice
@@ -49,15 +42,11 @@ BINARY_SENSORS: tuple[MieleBinarySensorDescription, ...] = (
         key="running",
         translation_key="running",
         device_class=BinarySensorDeviceClass.RUNNING,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: d.status_raw in ACTIVE_STATES,
     ),
     MieleBinarySensorDescription(
         key="door",
         device_class=BinarySensorDeviceClass.DOOR,
-        exists_fn=lambda d: (
-            d.type_raw in LAUNDRY_TYPES | DISHWASHER_TYPES | OVEN_TYPES | COOLING_TYPES
-        ),
         value_fn=lambda d: d.signal_door,
     ),
     MieleBinarySensorDescription(
@@ -88,7 +77,6 @@ BINARY_SENSORS: tuple[MieleBinarySensorDescription, ...] = (
         key="mobile_start",
         translation_key="mobile_start",
         entity_category=EntityCategory.DIAGNOSTIC,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: d.mobile_start,
     ),
 )

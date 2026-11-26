@@ -38,7 +38,7 @@
           "use_push": "Use push updates (event stream)",
           "poll_interval": "Polling interval when push is unavailable",
           "stale_grace": "Keep last known state on cloud errors for",
-          "power_off_on_finish": "Switch washer/dryer/dishwasher off when the program ends (silences the end buzzer)",
+          "power_off_on_finish": "Switch the washing machine off when the program ends (silences the end buzzer)",
           "power_off_delay": "Delay before switching off"
         },
         "data_description": {
@@ -95,20 +95,8 @@
       "spin_speed": {
         "name": "Spin speed"
       },
-      "drying_step": {
-        "name": "Drying step"
-      },
       "target_temperature": {
         "name": "Target temperature"
-      },
-      "core_temperature": {
-        "name": "Core temperature"
-      },
-      "core_target_temperature": {
-        "name": "Core target temperature"
-      },
-      "ventilation_step": {
-        "name": "Fan level"
       },
       "energy_consumption": {
         "name": "Program energy"
@@ -128,35 +116,11 @@
       "water_total": {
         "name": "Water total"
       },
-      "temperature": {
-        "name": "Temperature"
-      },
-      "temperature_zone": {
-        "name": "Temperature zone {zone}"
-      },
-      "plate": {
-        "name": "Cooking zone {plate}"
-      },
       "twin_dos_1_level": {
         "name": "TwinDos 1 level"
       },
       "twin_dos_2_level": {
         "name": "TwinDos 2 level"
-      },
-      "power_disc_level": {
-        "name": "PowerDisk level"
-      },
-      "salt_level": {
-        "name": "Salt level"
-      },
-      "rinse_aid_level": {
-        "name": "Rinse aid level"
-      },
-      "coal_filter_saturation": {
-        "name": "Charcoal filter saturation"
-      },
-      "fat_filter_saturation": {
-        "name": "Grease filter saturation"
       },
       "last_update": {
         "name": "Last update"
@@ -176,12 +140,8 @@
           "idle": "Idle",
           "rinse_hold": "Rinse hold",
           "service": "Service",
-          "superfreezing": "Superfreezing",
-          "supercooling": "Supercooling",
-          "superheating": "Superheating",
           "default": "Default",
           "locked": "Locked",
-          "supercooling_superfreezing": "Supercooling & superfreezing",
           "not_connected": "Not connected",
           "unknown": "Unknown"
         }
@@ -228,36 +188,11 @@
     "switch": {
       "power": {
         "name": "Power"
-      },
-      "superfreezing": {
-        "name": "SuperFrost"
-      },
-      "supercooling": {
-        "name": "SuperCool"
-      }
-    },
-    "light": {
-      "light": {
-        "name": "Light"
-      },
-      "ambient_light": {
-        "name": "Ambient light"
-      }
-    },
-    "number": {
-      "target_temperature": {
-        "name": "Target temperature"
-      },
-      "target_temperature_zone": {
-        "name": "Target temperature zone {zone}"
       }
     },
     "select": {
       "program_select": {
         "name": "Start program"
-      },
-      "ventilation_select": {
-        "name": "Fan level"
       }
     },
     "event": {
@@ -311,11 +246,11 @@
         },
         "temperature": {
           "name": "Temperature",
-          "description": "Target temperature (ovens)."
+          "description": "Wash temperature (if supported)."
         },
         "duration": {
           "name": "Duration",
-          "description": "Program duration (ovens)."
+          "description": "Program duration (if supported)."
         },
         "start_delay": {
           "name": "Start delay",

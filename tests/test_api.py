@@ -29,7 +29,6 @@ def test_device_model() -> None:
     assert dev.elapsed_minutes == 30
     assert dev.progress == 25
     assert dev.target_temperature(0) == 40
-    assert dev.temperature(0) is None
     assert dev.energy_forecast == 30
     assert dev.spin_speed == 1400
     assert dev.name == "Waschmaschine"
@@ -93,11 +92,6 @@ def test_real_payload() -> None:
     assert dev.remaining_minutes == 39
     assert dev.progress == 64
     assert dev.target_temperature(0) == 30
-    assert dev.core_temperature is None
-    assert dev.core_target_temperature is None
-    assert dev.drying_step is None
-    assert dev.ventilation_step is None
-    assert dev.light_on is None
     assert dev.water_consumption == 20
     assert dev.energy_forecast == 40
     assert dev.process_actions() == [2]

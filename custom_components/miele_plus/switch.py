@@ -1,4 +1,4 @@
-"""Switch platform for Miele Plus (power, superfreezing, supercooling)."""
+"""Switch platform for Miele Plus (power)."""
 
 from __future__ import annotations
 
@@ -11,14 +11,6 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.event import async_call_later
 
-from .const import (
-    FREEZER_TYPES,
-    FRIDGE_TYPES,
-    PROGRAM_TYPES,
-    DeviceType,
-    MieleStatus,
-    ProcessAction,
-)
 from .coordinator import MieleConfigEntry
 from .entity import MieleEntity, MieleEntityDescription, async_setup_device_entities
 from .models import MieleDevice
@@ -46,35 +38,6 @@ SWITCHES: tuple[MieleSwitchDescription, ...] = (
         off_body={"powerOff": True},
         on_allowed_fn=lambda d: d.can("powerOn"),
         off_allowed_fn=lambda d: d.can("powerOff"),
-        exists_fn=lambda d: (
-            "powerOn" in d.actions
-            or "powerOff" in d.actions
-            or d.type_raw in PROGRAM_TYPES | {DeviceType.HOOD}
-        ),
-    ),
-    MieleSwitchDescription(
-        key="superfreezing",
-        translation_key="superfreezing",
-        is_on_fn=lambda d: (
-            d.status_raw in (MieleStatus.SUPERFREEZING, MieleStatus.SUPERCOOLING_SUPERFREEZING)
-        ),
-        on_body={"processAction": int(ProcessAction.START_SUPERFREEZING)},
-        off_body={"processAction": int(ProcessAction.STOP_SUPERFREEZING)},
-        on_allowed_fn=lambda d: ProcessAction.START_SUPERFREEZING in d.process_actions(),
-        off_allowed_fn=lambda d: ProcessAction.STOP_SUPERFREEZING in d.process_actions(),
-        exists_fn=lambda d: d.type_raw in FREEZER_TYPES,
-    ),
-    MieleSwitchDescription(
-        key="supercooling",
-        translation_key="supercooling",
-        is_on_fn=lambda d: (
-            d.status_raw in (MieleStatus.SUPERCOOLING, MieleStatus.SUPERCOOLING_SUPERFREEZING)
-        ),
-        on_body={"processAction": int(ProcessAction.START_SUPERCOOLING)},
-        off_body={"processAction": int(ProcessAction.STOP_SUPERCOOLING)},
-        on_allowed_fn=lambda d: ProcessAction.START_SUPERCOOLING in d.process_actions(),
-        off_allowed_fn=lambda d: ProcessAction.STOP_SUPERCOOLING in d.process_actions(),
-        exists_fn=lambda d: d.type_raw in FRIDGE_TYPES,
     ),
 )
 

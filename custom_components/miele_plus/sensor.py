@@ -28,19 +28,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.restore_state import ExtraStoredData
 from homeassistant.util import dt as dt_util
 
-from .const import (
-    COOLING_TYPES,
-    DRYER_TYPES,
-    ECO_TYPES,
-    HOB_TYPES,
-    OVEN_TYPES,
-    PROGRAM_STATES,
-    PROGRAM_TYPES,
-    STATUS_KEYS,
-    WASHER_TYPES,
-    DeviceType,
-    MieleStatus,
-)
+from .const import PROGRAM_STATES, STATUS_KEYS, MieleStatus
 from .coordinator import MieleConfigEntry, MieleCoordinator
 from .entity import MieleEntity, MieleEntityDescription, async_setup_device_entities
 from .models import MieleDevice
@@ -79,14 +67,12 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     MieleSensorDescription(
         key="program",
         translation_key="program",
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: d.program_name,
         attr_fn=lambda d: {"program_id": d.program_id, "program_type": d.program_type},
     ),
     MieleSensorDescription(
         key="program_phase",
         translation_key="program_phase",
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: _in_program(d, d.program_phase, None),
         attr_fn=lambda d: {"program_phase_raw": d.program_phase_raw},
     ),
@@ -96,7 +82,6 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         state_class=SensorStateClass.MEASUREMENT,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: _in_program(d, d.remaining_minutes),
     ),
     MieleSensorDescription(
@@ -105,7 +90,6 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         state_class=SensorStateClass.MEASUREMENT,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: _in_program(d, d.display_elapsed_minutes),
     ),
     MieleSensorDescription(
@@ -113,52 +97,20 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
         translation_key="progress",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
         value_fn=lambda d: d.progress if d.progress is not None else 0,
     ),
     MieleSensorDescription(
         key="spin_speed",
         translation_key="spin_speed",
         native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
-        exists_fn=lambda d: d.type_raw in WASHER_TYPES,
         value_fn=lambda d: _in_program(d, d.spin_speed, None),
-    ),
-    MieleSensorDescription(
-        key="drying_step",
-        translation_key="drying_step",
-        exists_fn=lambda d: d.type_raw in DRYER_TYPES,
-        value_fn=lambda d: _in_program(d, d.drying_step, None),
     ),
     MieleSensorDescription(
         key="target_temperature",
         translation_key="target_temperature",
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        exists_fn=lambda d: d.type_raw in OVEN_TYPES | WASHER_TYPES | DRYER_TYPES,
         value_fn=lambda d: d.target_temperature(0),
-    ),
-    MieleSensorDescription(
-        key="core_temperature",
-        translation_key="core_temperature",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        state_class=SensorStateClass.MEASUREMENT,
-        exists_fn=lambda d: d.type_raw in OVEN_TYPES and "coreTemperature" in d.state,
-        value_fn=lambda d: d.core_temperature,
-    ),
-    MieleSensorDescription(
-        key="core_target_temperature",
-        translation_key="core_target_temperature",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        exists_fn=lambda d: d.type_raw in OVEN_TYPES and "coreTargetTemperature" in d.state,
-        value_fn=lambda d: d.core_target_temperature,
-    ),
-    MieleSensorDescription(
-        key="ventilation_step",
-        translation_key="ventilation_step",
-        exists_fn=lambda d: d.type_raw == DeviceType.HOOD,
-        value_fn=lambda d: d.ventilation_step,
     ),
     MieleSensorDescription(
         key="energy_consumption",
@@ -166,7 +118,6 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         suggested_display_precision=2,
-        exists_fn=lambda d: d.type_raw in ECO_TYPES,
         value_fn=lambda d: d.energy_consumption,
     ),
     MieleSensorDescription(
@@ -174,30 +125,19 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
         translation_key="water_consumption",
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.LITERS,
-        exists_fn=lambda d: d.type_raw in ECO_TYPES,
         value_fn=lambda d: d.water_consumption,
     ),
     MieleSensorDescription(
         key="energy_forecast",
         translation_key="energy_forecast",
         native_unit_of_measurement=PERCENTAGE,
-        exists_fn=lambda d: d.type_raw in ECO_TYPES,
         value_fn=lambda d: d.energy_forecast,
     ),
     MieleSensorDescription(
         key="water_forecast",
         translation_key="water_forecast",
         native_unit_of_measurement=PERCENTAGE,
-        exists_fn=lambda d: d.type_raw in ECO_TYPES,
         value_fn=lambda d: d.water_forecast,
-    ),
-    MieleSensorDescription(
-        key="battery",
-        device_class=SensorDeviceClass.BATTERY,
-        native_unit_of_measurement=PERCENTAGE,
-        state_class=SensorStateClass.MEASUREMENT,
-        exists_fn=lambda d: d.type_raw == DeviceType.ROBOT_VACUUM_CLEANER,
-        value_fn=lambda d: d.battery_level,
     ),
 )
 
@@ -207,19 +147,13 @@ FILLING_SENSORS: tuple[MieleSensorDescription, ...] = tuple(
         translation_key=key,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        entity_category=category,
         exists_fn=lambda d, raw=raw: d.filling_level(raw) is not None,
         value_fn=lambda d, raw=raw: d.filling_level(raw),
         always_available=True,
     )
-    for key, raw, category in (
-        ("twin_dos_1_level", "twinDosContainer1FillingLevel", None),
-        ("twin_dos_2_level", "twinDosContainer2FillingLevel", None),
-        ("power_disc_level", "powerDiscFillingLevel", None),
-        ("salt_level", "saltFillingLevel", None),
-        ("rinse_aid_level", "rinseAidFillingLevel", None),
-        ("coal_filter_saturation", "coalFilterSaturation", EntityCategory.DIAGNOSTIC),
-        ("fat_filter_saturation", "fatFilterSaturation", EntityCategory.DIAGNOSTIC),
+    for key, raw in (
+        ("twin_dos_1_level", "twinDosContainer1FillingLevel"),
+        ("twin_dos_2_level", "twinDosContainer2FillingLevel"),
     )
 )
 
@@ -231,7 +165,6 @@ TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         suggested_display_precision=2,
-        exists_fn=lambda d: d.type_raw in ECO_TYPES,
         value_fn=lambda d: d.energy_consumption,
         always_available=True,
     ),
@@ -241,32 +174,15 @@ TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.LITERS,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        exists_fn=lambda d: d.type_raw in ECO_TYPES,
         value_fn=lambda d: d.water_consumption,
         always_available=True,
     ),
-)
-
-TEMPERATURE_DESCRIPTION = MieleSensorDescription(
-    key="temperature",
-    translation_key="temperature",
-    device_class=SensorDeviceClass.TEMPERATURE,
-    native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-    state_class=SensorStateClass.MEASUREMENT,
-    value_fn=lambda d: d.temperature(0),
-)
-
-PLATE_DESCRIPTION = MieleSensorDescription(
-    key="plate",
-    translation_key="plate",
-    value_fn=lambda d: None,
 )
 
 FINISH_DESCRIPTION = MieleSensorDescription(
     key="finish_time",
     translation_key="finish_time",
     device_class=SensorDeviceClass.TIMESTAMP,
-    exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
     value_fn=lambda d: None,
 )
 
@@ -274,7 +190,6 @@ START_DESCRIPTION = MieleSensorDescription(
     key="start_time",
     translation_key="start_time",
     device_class=SensorDeviceClass.TIMESTAMP,
-    exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
     value_fn=lambda d: None,
 )
 
@@ -317,17 +232,8 @@ async def async_setup_entry(
         for desc in TOTAL_SENSORS:
             if desc.exists_fn(dev):
                 yield MieleTotalSensor(coordinator, dev.serial, desc)
-        zones = set(dev.temperature_zones())
-        if dev.type_raw in OVEN_TYPES | COOLING_TYPES:
-            zones.add(0)
-        for zone in sorted(zones):
-            yield MieleTemperatureSensor(coordinator, dev.serial, zone)
-        if dev.type_raw in HOB_TYPES:
-            for idx in range(len(dev.plate_steps)):
-                yield MielePlateSensor(coordinator, dev.serial, idx)
-        if FINISH_DESCRIPTION.exists_fn(dev):
-            yield MieleFinishTimeSensor(coordinator, dev.serial, FINISH_DESCRIPTION)
-            yield MieleStartTimeSensor(coordinator, dev.serial, START_DESCRIPTION)
+        yield MieleFinishTimeSensor(coordinator, dev.serial, FINISH_DESCRIPTION)
+        yield MieleStartTimeSensor(coordinator, dev.serial, START_DESCRIPTION)
         yield MieleUpdateModeSensor(coordinator, dev.serial, CONNECTION_DESCRIPTION)
         yield MieleLastUpdateSensor(coordinator, dev.serial, LAST_UPDATE_DESCRIPTION)
 
@@ -361,44 +267,6 @@ class MieleSensor(MieleEntity, SensorEntity):
         if self.entity_description.attr_fn is None:
             return None
         return self.entity_description.attr_fn(self.device)
-
-
-class MieleTemperatureSensor(MieleSensor):
-    """Temperature of a zone."""
-
-    def __init__(self, coordinator: MieleCoordinator, serial: str, zone: int) -> None:
-        """Initialize."""
-        super().__init__(
-            coordinator,
-            serial,
-            TEMPERATURE_DESCRIPTION,
-            None if zone == 0 else str(zone + 1),
-        )
-        self._zone = zone
-        if zone > 0:
-            self._attr_translation_key = "temperature_zone"
-            self._attr_translation_placeholders = {"zone": str(zone + 1)}
-
-    @property
-    def native_value(self) -> float | None:
-        """Return the temperature."""
-        return self.device.temperature(self._zone)
-
-
-class MielePlateSensor(MieleSensor):
-    """Power step of a hob cooking zone."""
-
-    def __init__(self, coordinator: MieleCoordinator, serial: str, idx: int) -> None:
-        """Initialize."""
-        super().__init__(coordinator, serial, PLATE_DESCRIPTION, str(idx + 1))
-        self._idx = idx
-        self._attr_translation_placeholders = {"plate": str(idx + 1)}
-
-    @property
-    def native_value(self) -> int | None:
-        """Return the step."""
-        steps = self.device.plate_steps
-        return steps[self._idx] if self._idx < len(steps) else None
 
 
 class _StableTimestampSensor(MieleSensor):

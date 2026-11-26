@@ -9,7 +9,7 @@ from homeassistant.components.button import ButtonEntity, ButtonEntityDescriptio
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import PROGRAM_TYPES, DeviceType, ProcessAction
+from .const import ProcessAction
 from .coordinator import MieleConfigEntry
 from .entity import MieleEntity, MieleEntityDescription, async_setup_device_entities
 from .models import MieleDevice
@@ -29,19 +29,16 @@ BUTTONS: tuple[MieleButtonDescription, ...] = (
         key="start",
         translation_key="start",
         action=ProcessAction.START,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES | {DeviceType.HOOD},
     ),
     MieleButtonDescription(
         key="stop",
         translation_key="stop",
         action=ProcessAction.STOP,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES | {DeviceType.HOOD},
     ),
     MieleButtonDescription(
         key="pause",
         translation_key="pause",
         action=ProcessAction.PAUSE,
-        exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
     ),
 )
 

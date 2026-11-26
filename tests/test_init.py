@@ -33,14 +33,13 @@ async def test_setup_creates_entities(
     assert _state(hass, "sensor.waschmaschine_progress") == "25"
     assert _state(hass, "sensor.waschmaschine_program") == "Baumwolle"
     assert _state(hass, "binary_sensor.waschmaschine_running") == "on"
-    assert _state(hass, "sensor.kuche_temperature") == "4.5"
-    assert _state(hass, "sensor.kuche_temperature_zone_2") == "-18.2"
-    assert _state(hass, "number.kuche_target_temperature") == "4.0"
-    assert _state(hass, "number.kuche_target_temperature_zone_2") == "-18.0"
+    # Only washing machines are supported: the fridge-freezer is ignored
+    assert not [e for e in hass.states.async_entity_ids() if "kuche" in e]
+    assert dr.async_get(hass).async_get_device(identifiers={(DOMAIN, SERIAL_FRIDGE)}) is None
     # start not allowed while running, stop/pause allowed
     assert _state(hass, "button.waschmaschine_start") == STATE_UNAVAILABLE
     assert _state(hass, "button.waschmaschine_stop") == "unknown"
-    assert _state(hass, "switch.kuche_supercool") in ("off", "on")
+    assert _state(hass, "switch.waschmaschine_power") == "on"
     assert _state(hass, "sensor.waschmaschine_finish_time") != "unknown"
     assert _state(hass, "sensor.waschmaschine_update_mode") == "polling"
     assert _state(hass, "sensor.waschmaschine_twindos_1_level") == "68"
@@ -108,16 +107,6 @@ async def test_commands_and_services(
         "button", "press", {"entity_id": "button.waschmaschine_pause"}, blocking=True
     )
     mock_api["send_action"].assert_awaited_with(SERIAL_WM, {"processAction": 3})
-
-    await hass.services.async_call(
-        "number",
-        "set_value",
-        {"entity_id": "number.kuche_target_temperature", "value": 5},
-        blocking=True,
-    )
-    mock_api["send_action"].assert_awaited_with(
-        SERIAL_FRIDGE, {"targetTemperature": [{"zone": 1, "value": 5}]}
-    )
 
     device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, SERIAL_WM)})
     await hass.services.async_call(

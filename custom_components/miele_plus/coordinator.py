@@ -31,7 +31,6 @@ from .const import (
     DEFAULT_POWER_OFF_ON_FINISH,
     DEFAULT_STALE_GRACE,
     DEFAULT_USE_PUSH,
-    DISHWASHER_TYPES,
     DOMAIN,
     EVENT_DOOR_CLOSED,
     EVENT_DOOR_OPENED,
@@ -45,12 +44,11 @@ from .const import (
     EVENT_PROGRAM_STARTED,
     FILLING_LEVELS_INTERVAL,
     HEALTHY_PUSH_POLL_INTERVAL,
-    LAUNDRY_TYPES,
-    PROGRAM_TYPES,
     SIGNAL_DEVICE_EVENT,
     SSE_BACKOFF_MAX,
     SSE_BACKOFF_MIN,
     SSE_WATCHDOG_TIMEOUT,
+    SUPPORTED_TYPES,
     MieleStatus,
 )
 from .models import MieleDevice
@@ -247,7 +245,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
     def _schedule_program_loading(self, devices: dict[str, MieleDevice]) -> None:
         now = time.monotonic()
         for dev in devices.values():
-            if dev.type_raw not in PROGRAM_TYPES or dev.programs or not dev.is_on:
+            if dev.programs or not dev.is_on:
                 continue
             if now - self._programs_tried.get(dev.serial, -PROGRAMS_RETRY) < PROGRAMS_RETRY:
                 continue
@@ -280,6 +278,9 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
         current = dict(self.data or {})
         for serial, payload in raw.items():
             if not isinstance(payload, dict):
+                continue
+            if serial not in current and not _is_supported(payload):
+                # Miele Plus currently only handles washing machines
                 continue
             existing = current.get(serial)
             if existing is None:
@@ -320,7 +321,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
                 events.append((EVENT_PROGRAM_PAUSED, {}))
             elif new_status == MieleStatus.PROGRAM_ENDED and old_status in active:
                 self._filling_next = 0.0
-                if self.power_off_on_finish and new.type_raw in LAUNDRY_TYPES | DISHWASHER_TYPES:
+                if self.power_off_on_finish:
                     self.config_entry.async_create_background_task(
                         self.hass, self._auto_power_off(new.serial), f"{DOMAIN}_power_off"
                     )
@@ -515,6 +516,11 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             self._schedule_actions_refresh()
         else:
             await self.async_request_refresh()
+
+
+def _is_supported(payload: dict[str, Any]) -> bool:
+    type_raw = (payload.get("ident") or {}).get("type", {}).get("value_raw")
+    return type_raw in SUPPORTED_TYPES
 
 
 def _deep_merge(base: dict[str, Any], update: dict[str, Any]) -> dict[str, Any]:

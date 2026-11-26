@@ -8,7 +8,6 @@ from typing import Any
 
 from .const import (
     ACTIVE_STATES,
-    COOLING_TYPES,
     STATUS_KEYS,
     TEMPERATURE_NONE_THRESHOLD,
     MieleStatus,
@@ -99,10 +98,6 @@ class MieleDevice:
     @property
     def hw_version(self) -> str | None:
         return _get(self.ident, "xkmIdentLabel", "techType")
-
-    @property
-    def is_cooling(self) -> bool:
-        return self.type_raw in COOLING_TYPES
 
     # ------------------------------------------------------------ status
 
@@ -217,46 +212,10 @@ class MieleDevice:
         value = _get(self.state, "spinningSpeed", "value_raw")
         return value if isinstance(value, int) and value > 0 else None
 
-    @property
-    def drying_step(self) -> str | None:
-        value = _get(self.state, "dryingStep", "value_raw")
-        if value is None or value == 65535:
-            return None
-        return _get(self.state, "dryingStep", "value_localized") or None
-
-    @property
-    def ventilation_step(self) -> int | None:
-        value = _get(self.state, "ventilationStep", "value_raw")
-        return value if isinstance(value, int) else None
-
-    @property
-    def plate_steps(self) -> list[int | None]:
-        plates = self.state.get("plateStep") or []
-        return [p.get("value_raw") if isinstance(p, dict) else None for p in plates]
-
     # ------------------------------------------------------- temperatures
-
-    def temperature(self, zone: int) -> float | None:
-        return _temperature(_get(self.state, "temperature", zone))
 
     def target_temperature(self, zone: int) -> float | None:
         return _temperature(_get(self.state, "targetTemperature", zone))
-
-    @property
-    def core_temperature(self) -> float | None:
-        return _temperature(_get(self.state, "coreTemperature", 0))
-
-    @property
-    def core_target_temperature(self) -> float | None:
-        return _temperature(_get(self.state, "coreTargetTemperature", 0))
-
-    def temperature_zones(self) -> list[int]:
-        temps = self.state.get("temperature") or []
-        return [i for i, t in enumerate(temps) if _temperature(t) is not None]
-
-    def target_temperature_zones(self) -> list[int]:
-        temps = self.state.get("targetTemperature") or []
-        return [i for i, t in enumerate(temps) if _temperature(t) is not None]
 
     # ------------------------------------------------------------ signals
 
@@ -283,29 +242,6 @@ class MieleDevice:
     @property
     def mobile_start(self) -> bool | None:
         return _get(self.state, "remoteEnable", "mobileStart")
-
-    @property
-    def light_on(self) -> bool | None:
-        value = self.state.get("light")
-        if value == 1:
-            return True
-        if value == 2:
-            return False
-        return None
-
-    @property
-    def ambient_light_on(self) -> bool | None:
-        value = self.state.get("ambientLight")
-        if value == 1:
-            return True
-        if value == 2:
-            return False
-        return None
-
-    @property
-    def battery_level(self) -> int | None:
-        value = self.state.get("batteryLevel")
-        return value if isinstance(value, int) else None
 
     # ------------------------------------------------------- eco feedback
 
@@ -338,15 +274,6 @@ class MieleDevice:
         if isinstance(value, bool):
             return value
         return bool(value)
-
-    def target_temperature_limits(self, zone: int) -> tuple[float, float] | None:
-        for entry in self.actions.get("targetTemperature") or []:
-            if isinstance(entry, dict) and entry.get("zone") == zone + 1:
-                try:
-                    return float(entry["min"]), float(entry["max"])
-                except (KeyError, TypeError, ValueError):
-                    return None
-        return None
 
     def filling_level(self, key: str) -> int | float | None:
         value = self.filling_levels.get(key)

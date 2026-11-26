@@ -71,12 +71,8 @@ class MieleStatus(IntEnum):
     IDLE = 10
     RINSE_HOLD = 11
     SERVICE = 12
-    SUPERFREEZING = 13
-    SUPERCOOLING = 14
-    SUPERHEATING = 15
     DEFAULT = 144
     LOCKED = 145
-    SUPERCOOLING_SUPERFREEZING = 146
     NOT_CONNECTED = 255
 
 
@@ -93,12 +89,8 @@ STATUS_KEYS: Final[dict[int, str]] = {
     MieleStatus.IDLE: "idle",
     MieleStatus.RINSE_HOLD: "rinse_hold",
     MieleStatus.SERVICE: "service",
-    MieleStatus.SUPERFREEZING: "superfreezing",
-    MieleStatus.SUPERCOOLING: "supercooling",
-    MieleStatus.SUPERHEATING: "superheating",
     MieleStatus.DEFAULT: "default",
     MieleStatus.LOCKED: "locked",
-    MieleStatus.SUPERCOOLING_SUPERFREEZING: "supercooling_superfreezing",
     MieleStatus.NOT_CONNECTED: "not_connected",
 }
 
@@ -124,117 +116,20 @@ class ProcessAction(IntEnum):
     START = 1
     STOP = 2
     PAUSE = 3
-    START_SUPERFREEZING = 4
-    STOP_SUPERFREEZING = 5
-    START_SUPERCOOLING = 6
-    STOP_SUPERCOOLING = 7
 
 
 class DeviceType(IntEnum):
-    """Appliance type codes."""
+    """Appliance type codes (only washing machines are supported)."""
 
     WASHING_MACHINE = 1
-    TUMBLE_DRYER = 2
     WASHING_MACHINE_SEMI_PRO = 3
-    TUMBLE_DRYER_SEMI_PRO = 4
     WASHING_MACHINE_PRO = 5
-    DRYER_PRO = 6
-    DISHWASHER = 7
-    DISHWASHER_SEMI_PRO = 8
-    DISHWASHER_PRO = 9
-    OVEN = 12
-    OVEN_MICROWAVE = 13
-    HOB_HIGHLIGHT = 14
-    STEAM_OVEN = 15
-    MICROWAVE = 16
-    COFFEE_SYSTEM = 17
-    HOOD = 18
-    FRIDGE = 19
-    FREEZER = 20
-    FRIDGE_FREEZER = 21
-    ROBOT_VACUUM_CLEANER = 23
     WASHER_DRYER = 24
-    DISH_WARMER = 25
-    HOB_INDUCTION = 27
-    STEAM_OVEN_COMBI = 31
-    WINE_CABINET = 32
-    WINE_CONDITIONING_UNIT = 33
-    WINE_STORAGE_CONDITIONING_UNIT = 34
-    STEAM_OVEN_MICRO = 45
-    DIALOG_OVEN = 67
-    WINE_CABINET_FREEZER = 68
-    STEAM_OVEN_MK2 = 73
-    HOB_INDUCT_EXTR = 74
 
 
-LAUNDRY_TYPES: Final = frozenset(
-    {
-        DeviceType.WASHING_MACHINE,
-        DeviceType.TUMBLE_DRYER,
-        DeviceType.WASHING_MACHINE_SEMI_PRO,
-        DeviceType.TUMBLE_DRYER_SEMI_PRO,
-        DeviceType.WASHING_MACHINE_PRO,
-        DeviceType.DRYER_PRO,
-        DeviceType.WASHER_DRYER,
-    }
-)
-WASHER_TYPES: Final = frozenset(
-    {
-        DeviceType.WASHING_MACHINE,
-        DeviceType.WASHING_MACHINE_SEMI_PRO,
-        DeviceType.WASHING_MACHINE_PRO,
-        DeviceType.WASHER_DRYER,
-    }
-)
-DRYER_TYPES: Final = frozenset(
-    {
-        DeviceType.TUMBLE_DRYER,
-        DeviceType.TUMBLE_DRYER_SEMI_PRO,
-        DeviceType.DRYER_PRO,
-        DeviceType.WASHER_DRYER,
-    }
-)
-DISHWASHER_TYPES: Final = frozenset(
-    {DeviceType.DISHWASHER, DeviceType.DISHWASHER_SEMI_PRO, DeviceType.DISHWASHER_PRO}
-)
-OVEN_TYPES: Final = frozenset(
-    {
-        DeviceType.OVEN,
-        DeviceType.OVEN_MICROWAVE,
-        DeviceType.STEAM_OVEN,
-        DeviceType.MICROWAVE,
-        DeviceType.STEAM_OVEN_COMBI,
-        DeviceType.STEAM_OVEN_MICRO,
-        DeviceType.DIALOG_OVEN,
-        DeviceType.STEAM_OVEN_MK2,
-        DeviceType.DISH_WARMER,
-    }
-)
-HOB_TYPES: Final = frozenset(
-    {DeviceType.HOB_HIGHLIGHT, DeviceType.HOB_INDUCTION, DeviceType.HOB_INDUCT_EXTR}
-)
-FRIDGE_TYPES: Final = frozenset({DeviceType.FRIDGE, DeviceType.FRIDGE_FREEZER})
-FREEZER_TYPES: Final = frozenset(
-    {DeviceType.FREEZER, DeviceType.FRIDGE_FREEZER, DeviceType.WINE_CABINET_FREEZER}
-)
-WINE_TYPES: Final = frozenset(
-    {
-        DeviceType.WINE_CABINET,
-        DeviceType.WINE_CONDITIONING_UNIT,
-        DeviceType.WINE_STORAGE_CONDITIONING_UNIT,
-        DeviceType.WINE_CABINET_FREEZER,
-    }
-)
-COOLING_TYPES: Final = FRIDGE_TYPES | FREEZER_TYPES | WINE_TYPES
-# Appliances that run "programs" with a duration
-PROGRAM_TYPES: Final = (
-    LAUNDRY_TYPES
-    | DISHWASHER_TYPES
-    | OVEN_TYPES
-    | {DeviceType.COFFEE_SYSTEM, DeviceType.ROBOT_VACUUM_CLEANER}
-)
-# Appliances that report eco feedback (energy/water consumption)
-ECO_TYPES: Final = LAUNDRY_TYPES | DISHWASHER_TYPES
+# Miele Plus currently only handles washing machines; other appliances are ignored
+SUPPORTED_TYPES: Final = frozenset(DeviceType)
+
 
 # Event types fired on the bus and by the event entities
 EVENT_PROGRAM_STARTED: Final = "program_started"
@@ -257,14 +152,6 @@ EVENT_TYPES: Final = [
     EVENT_DOOR_OPENED,
     EVENT_DOOR_CLOSED,
 ]
-
-# Fridge/freezer modes ("modes" action)
-MODE_KEYS: Final[dict[int, str]] = {
-    0: "normal",
-    1: "sabbath",
-    2: "party",
-    3: "holiday",
-}
 
 SERVICE_START_PROGRAM: Final = "start_program"
 SERVICE_SET_START_TIME: Final = "set_start_time"

@@ -4,6 +4,9 @@ Eine eigenständige Custom Integration (`miele_plus`) für die Miele 3rd-Party-C
 Sie läuft **parallel** zur offiziellen `miele`-Integration (andere Domain) und legt den
 Schwerpunkt auf **Zuverlässigkeit** und **Automationsfreundlichkeit**.
 
+> **Unterstützte Geräte:** derzeit ausschließlich **Waschmaschinen** (inkl. Waschtrockner).
+> Andere Miele-Geräte im Konto werden ignoriert.
+
 ## Was ist besser als bei der offiziellen Integration?
 
 ### Zuverlässigkeit
@@ -26,7 +29,7 @@ Diagnose-Sensor **„Aktualisierungsmodus“** (`push`/`polling`) mit Statistike
 
 ### Zusätzliche Features
 - **Endzeit** und **Startzeit** (bei Startvorwahl) als Zeitstempel – stabil, ohne Minuten-Gezappel
-- **Fortschritt in %**, Restzeit, Laufzeit, Programmphase, Schleuderdrehzahl, Trockenstufe
+- **Fortschritt in %**, Restzeit, Laufzeit, Programmphase, Schleuderdrehzahl, Waschtemperatur
 - **Energie‑ und Wasserzähler „gesamt“** (`total_increasing`, über Neustarts gespeichert)
   → direkt im **Energie-Dashboard** nutzbar, inkl. Wasser
 - Verbrauch & Prognose des laufenden Programms
@@ -34,12 +37,12 @@ Diagnose-Sensor **„Aktualisierungsmodus“** (`push`/`polling`) mit Statistike
   `program_started`, `program_finished`, `program_aborted`, `program_paused`,
   `program_resumed`, `failure`, `info`, `door_opened`, `door_closed`
   – `program_finished` enthält Dauer, kWh und Liter des Programms
-- **Programm starten** per Select-Entität oder Dienst (inkl. Temperatur, Dauer, Startvorwahl)
+- **TwinDos-Füllstände** (Container 1 und 2)
+- **Automatisch ausschalten nach Programmende** (optional, stoppt den Signalton)
+- **Laufzeit bleibt nach Programmende stehen** statt auf 0 zu springen
+- **Programm starten** per Select-Entität oder Dienst (inkl. Startvorwahl)
 - Buttons Start/Stop/Pause (nur verfügbar, wenn das Gerät die Aktion gerade erlaubt)
-- Schalter Ein/Aus, SuperFrost, SuperKühlen (optimistisch, mit Rückfall)
-- Zieltemperatur je Zone für Kühl-/Gefrier-/Weinschränke
-- Licht und Ambientelicht (Dunstabzugshaube inkl. Farben als Effekte), Lüfterstufe
-- Kochzonen-Stufen bei Kochfeldern, Kerntemperatur bei Backöfen, Akkustand beim Saugroboter
+- Schalter Ein/Aus (optimistisch, mit Rückfall)
 - Status als übersetzte **Enum** (sprachunabhängig in Automationen: `running`, `program_ended`, …)
 - Sprache der Programm-/Phasennamen frei wählbar
 
@@ -69,14 +72,16 @@ Ordner `custom_components/miele_plus` nach `<config>/custom_components/` kopiere
 | Push-Updates | an | Event-Stream verwenden |
 | Abfrageintervall ohne Push | 60 s | Polling, wenn Push nicht verfügbar ist (läuft ein Programm: max. 30 s) |
 | Grace-Periode | 15 min | So lange bleiben Werte bei Cloud-Fehlern erhalten |
+| Nach Programmende ausschalten | aus | Schaltet die Maschine ab (stoppt den Signalton, beendet den Knitterschutz) |
+| Verzögerung bis zum Ausschalten | 0 s | 0 = direkt nach Programmende |
 
 ## Dienste
 | Dienst | Zweck |
 |---|---|
-| `miele_plus.start_program` | Programm per `program_id` oder `program` (Name) starten; optional `temperature`, `duration`, `start_delay` |
+| `miele_plus.start_program` | Programm per `program_id` oder `program` (Name) starten; optional `start_delay` |
 | `miele_plus.set_start_time` | Startvorwahl setzen |
 | `miele_plus.get_programs` | Fernstartbare Programme abfragen (liefert Antwort) |
-| `miele_plus.send_action` | Beliebige API-Aktion senden, z. B. `{"modes": 1}` (Sabbat-Modus) |
+| `miele_plus.send_action` | Beliebige API-Aktion senden, z. B. `{"processAction": 2}` |
 | `miele_plus.refresh` | Sofort aus der Cloud aktualisieren |
 
 > Fernsteuerung funktioniert nur, wenn am Gerät *Fernsteuerung* bzw. *MobileStart*
@@ -106,13 +111,13 @@ automation:
             {{ trigger.to_state.attributes.water_l }} l).
 ```
 
-Geschirrspüler bei günstigem Strom starten:
+Waschmaschine bei günstigem Strom starten:
 ```yaml
 actions:
   - action: miele_plus.start_program
     data:
       device_id: <Geräte-ID>
-      program: Eco
+      program: Pflegeleicht
       start_delay: "02:30:00"
 ```
 
