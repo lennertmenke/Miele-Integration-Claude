@@ -146,3 +146,36 @@ async def test_commands_and_services(
 async def test_unload(hass: HomeAssistant, setup_integration: MockConfigEntry) -> None:
     assert await hass.config_entries.async_unload(setup_integration.entry_id)
     assert setup_integration.state is ConfigEntryState.NOT_LOADED
+
+
+async def test_elapsed_kept_and_auto_power_off(
+    hass: HomeAssistant,
+    setup_integration: MockConfigEntry,
+    devices: dict[str, Any],
+    mock_api: dict[str, AsyncMock],
+) -> None:
+    import asyncio
+
+    coordinator = setup_integration.runtime_data
+    coordinator.power_off_on_finish = True
+    coordinator.power_off_delay = 0
+    assert _state(hass, "sensor.waschmaschine_elapsed_time") == "30"
+
+    update = copy.deepcopy(devices[SERIAL_WM])
+    update["state"]["status"] = {"value_raw": 7, "value_localized": "Ende"}
+    update["state"]["remainingTime"] = [0, 0]
+    update["state"]["elapsedTime"] = [0, 0]
+    coordinator._handle_push_event("devices", {SERIAL_WM: update})
+    await hass.async_block_till_done()
+    # Miele resets elapsedTime at the end; we keep the final value
+    assert _state(hass, "sensor.waschmaschine_elapsed_time") == "30"
+
+    await asyncio.sleep(1.2)
+    await hass.async_block_till_done()
+    mock_api["send_action"].assert_awaited_with(SERIAL_WM, {"powerOff": True})
+
+    update = copy.deepcopy(update)
+    update["state"]["status"] = {"value_raw": 1, "value_localized": "Aus"}
+    coordinator._handle_push_event("devices", {SERIAL_WM: update})
+    await hass.async_block_till_done()
+    assert _state(hass, "sensor.waschmaschine_elapsed_time") == "0"

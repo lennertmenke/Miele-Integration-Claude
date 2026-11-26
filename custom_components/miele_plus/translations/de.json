@@ -37,11 +37,15 @@
           "language": "Sprache der Programm-/Phasennamen",
           "use_push": "Push-Updates verwenden (Event-Stream)",
           "poll_interval": "Abfrageintervall ohne Push",
-          "stale_grace": "Letzten Zustand bei Cloud-Fehlern behalten für"
+          "stale_grace": "Letzten Zustand bei Cloud-Fehlern behalten für",
+          "power_off_on_finish": "Wasch-/Trocken-/Spülmaschine nach Programmende ausschalten (stoppt den Signalton)",
+          "power_off_delay": "Verzögerung bis zum Ausschalten"
         },
         "data_description": {
           "stale_grace": "Entitäten bleiben bei kurzen Ausfällen der Miele-Cloud mit ihren letzten Werten verfügbar, statt auf 'nicht verfügbar' zu springen.",
-          "poll_interval": "Während ein Programm läuft, wird höchstens 30 s verwendet."
+          "poll_interval": "Während ein Programm läuft, wird höchstens 30 s verwendet.",
+          "power_off_on_finish": "Erfordert aktivierte Fernsteuerung am Gerät. Beendet auch den Knitterschutz.",
+          "power_off_delay": "0 = direkt nach Programmende."
         }
       }
     }

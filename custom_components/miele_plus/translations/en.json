@@ -37,11 +37,15 @@
           "language": "Language of program/phase names",
           "use_push": "Use push updates (event stream)",
           "poll_interval": "Polling interval when push is unavailable",
-          "stale_grace": "Keep last known state on cloud errors for"
+          "stale_grace": "Keep last known state on cloud errors for",
+          "power_off_on_finish": "Switch washer/dryer/dishwasher off when the program ends (silences the end buzzer)",
+          "power_off_delay": "Delay before switching off"
         },
         "data_description": {
           "stale_grace": "Entities stay available with their last values during short Miele cloud outages instead of becoming unavailable.",
-          "poll_interval": "While a program is running, at most 30 s is used."
+          "poll_interval": "While a program is running, at most 30 s is used.",
+          "power_off_on_finish": "Requires remote control to be enabled on the appliance. Also ends the anti-crease phase.",
+          "power_off_delay": "0 = immediately after the program ends."
         }
       }
     }

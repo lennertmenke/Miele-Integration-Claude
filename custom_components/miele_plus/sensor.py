@@ -106,7 +106,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.MINUTES,
         state_class=SensorStateClass.MEASUREMENT,
         exists_fn=lambda d: d.type_raw in PROGRAM_TYPES,
-        value_fn=lambda d: _in_program(d, d.elapsed_minutes),
+        value_fn=lambda d: _in_program(d, d.display_elapsed_minutes),
     ),
     MieleSensorDescription(
         key="progress",

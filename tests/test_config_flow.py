@@ -62,10 +62,18 @@ async def test_options_flow(hass: HomeAssistant, setup_integration) -> None:
     assert result["type"] is FlowResultType.FORM
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
-        {"language": "en", "use_push": False, "poll_interval": 45, "stale_grace": 5},
+        {
+            "language": "en",
+            "use_push": False,
+            "poll_interval": 45,
+            "stale_grace": 5,
+            "power_off_on_finish": True,
+            "power_off_delay": 0,
+        },
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     coordinator = setup_integration.runtime_data
     assert coordinator.api.language == "en"
     assert coordinator.update_interval.total_seconds() == 30  # washer running
+    assert coordinator.power_off_on_finish is True

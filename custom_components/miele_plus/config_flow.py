@@ -28,10 +28,14 @@ import voluptuous as vol
 from .const import (
     CONF_LANGUAGE,
     CONF_POLL_INTERVAL,
+    CONF_POWER_OFF_DELAY,
+    CONF_POWER_OFF_ON_FINISH,
     CONF_STALE_GRACE,
     CONF_USE_PUSH,
     DEFAULT_LANGUAGE,
     DEFAULT_POLL_INTERVAL,
+    DEFAULT_POWER_OFF_DELAY,
+    DEFAULT_POWER_OFF_ON_FINISH,
     DEFAULT_STALE_GRACE,
     DEFAULT_USE_PUSH,
     DOMAIN,
@@ -151,6 +155,22 @@ class MieleOptionsFlow(OptionsFlow):
                         max=240,
                         step=1,
                         unit_of_measurement="min",
+                        mode=NumberSelectorMode.BOX,
+                    )
+                ),
+                vol.Required(
+                    CONF_POWER_OFF_ON_FINISH,
+                    default=options.get(CONF_POWER_OFF_ON_FINISH, DEFAULT_POWER_OFF_ON_FINISH),
+                ): bool,
+                vol.Required(
+                    CONF_POWER_OFF_DELAY,
+                    default=options.get(CONF_POWER_OFF_DELAY, DEFAULT_POWER_OFF_DELAY),
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=0,
+                        max=3600,
+                        step=5,
+                        unit_of_measurement="s",
                         mode=NumberSelectorMode.BOX,
                     )
                 ),

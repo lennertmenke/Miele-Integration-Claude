@@ -64,6 +64,7 @@ class MieleDevice:
     programs: list[dict[str, Any]] = field(default_factory=list)
     programs_loaded: bool = False
     filling_levels: dict[str, Any] = field(default_factory=dict)
+    last_elapsed_minutes: int | None = None
 
     # ------------------------------------------------------------- ident
 
@@ -172,6 +173,25 @@ class MieleDevice:
     @property
     def elapsed_minutes(self) -> int | None:
         return _minutes(self.state.get("elapsedTime"))
+
+    @property
+    def display_elapsed_minutes(self) -> int | None:
+        """Elapsed time that keeps the final value after the program ended.
+
+        Miele resets elapsedTime to 0 as soon as a program finishes.
+        """
+        elapsed = self.elapsed_minutes
+        if self.status_raw == MieleStatus.PROGRAM_ENDED and not elapsed:
+            return self.last_elapsed_minutes or elapsed
+        return elapsed
+
+    def track_elapsed(self) -> None:
+        """Remember the elapsed time while a program is active."""
+        elapsed = self.elapsed_minutes
+        if self.is_active and elapsed:
+            self.last_elapsed_minutes = elapsed
+        elif self.status_raw not in (MieleStatus.PROGRAM_ENDED, None):
+            self.last_elapsed_minutes = None
 
     @property
     def start_delay_minutes(self) -> int | None:

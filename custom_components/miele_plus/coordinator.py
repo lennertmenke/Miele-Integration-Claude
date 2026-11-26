@@ -22,11 +22,16 @@ from .const import (
     ACTIVE_POLL_INTERVAL,
     ACTIVE_STATES,
     CONF_POLL_INTERVAL,
+    CONF_POWER_OFF_DELAY,
+    CONF_POWER_OFF_ON_FINISH,
     CONF_STALE_GRACE,
     CONF_USE_PUSH,
     DEFAULT_POLL_INTERVAL,
+    DEFAULT_POWER_OFF_DELAY,
+    DEFAULT_POWER_OFF_ON_FINISH,
     DEFAULT_STALE_GRACE,
     DEFAULT_USE_PUSH,
+    DISHWASHER_TYPES,
     DOMAIN,
     EVENT_DOOR_CLOSED,
     EVENT_DOOR_OPENED,
@@ -40,6 +45,7 @@ from .const import (
     EVENT_PROGRAM_STARTED,
     FILLING_LEVELS_INTERVAL,
     HEALTHY_PUSH_POLL_INTERVAL,
+    LAUNDRY_TYPES,
     PROGRAM_TYPES,
     SIGNAL_DEVICE_EVENT,
     SSE_BACKOFF_MAX,
@@ -75,6 +81,10 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
         self.api = api
         self.options_snapshot = dict(entry.options)
         self.use_push: bool = entry.options.get(CONF_USE_PUSH, DEFAULT_USE_PUSH)
+        self.power_off_on_finish: bool = entry.options.get(
+            CONF_POWER_OFF_ON_FINISH, DEFAULT_POWER_OFF_ON_FINISH
+        )
+        self.power_off_delay = int(entry.options.get(CONF_POWER_OFF_DELAY, DEFAULT_POWER_OFF_DELAY))
         self._stale_grace = 60 * int(entry.options.get(CONF_STALE_GRACE, DEFAULT_STALE_GRACE))
         self.push_connected = False
         self.push_connected_since: datetime | None = None
@@ -274,11 +284,14 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             existing = current.get(serial)
             if existing is None:
                 current[serial] = MieleDevice(serial=serial, raw=payload)
+                current[serial].track_elapsed()
                 self._actions_dirty.add(serial)
                 continue
             old = MieleDevice(serial=serial, raw=existing.raw)
             existing.raw = _deep_merge(existing.raw, payload)
+            existing.last_elapsed_minutes = old.last_elapsed_minutes = existing.last_elapsed_minutes
             self._detect_transitions(old, existing)
+            existing.track_elapsed()
         if full:
             # Devices removed from the account disappear on full refreshes
             for serial in list(current):
@@ -307,11 +320,15 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
                 events.append((EVENT_PROGRAM_PAUSED, {}))
             elif new_status == MieleStatus.PROGRAM_ENDED and old_status in active:
                 self._filling_next = 0.0
+                if self.power_off_on_finish and new.type_raw in LAUNDRY_TYPES | DISHWASHER_TYPES:
+                    self.config_entry.async_create_background_task(
+                        self.hass, self._auto_power_off(new.serial), f"{DOMAIN}_power_off"
+                    )
                 events.append(
                     (
                         EVENT_PROGRAM_FINISHED,
                         {
-                            "duration": old.elapsed_minutes,
+                            "duration": old.elapsed_minutes or old.last_elapsed_minutes,
                             "energy_kwh": _first(new.energy_consumption, old.energy_consumption),
                             "water_l": _first(new.water_consumption, old.water_consumption),
                         },
@@ -440,6 +457,33 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             self.async_update_listeners()
 
     # ------------------------------------------------------------ commands
+
+    async def _auto_power_off(self, serial: str) -> None:
+        """Switch the appliance off after the program ended (silences the end buzzer)."""
+        await asyncio.sleep(max(self.power_off_delay, 1))
+        for attempt in range(1, 4):
+            dev = (self.data or {}).get(serial)
+            if dev is None or dev.status_raw != MieleStatus.PROGRAM_ENDED:
+                _LOGGER.debug("Auto power-off for %s skipped: status changed", serial)
+                return
+            try:
+                await self.api.send_action(serial, {"powerOff": True})
+            except MieleAuthError:
+                self.config_entry.async_start_reauth(self.hass)
+                return
+            except MieleApiError as err:
+                _LOGGER.debug("Auto power-off attempt %s for %s failed: %s", attempt, serial, err)
+                await asyncio.sleep(10 * attempt)
+                continue
+            _LOGGER.info("Switched off %s after the program ended", dev.name)
+            self.stats["auto_power_off"] = self.stats.get("auto_power_off", 0) + 1
+            self._actions_dirty.add(serial)
+            if not self.push_connected:
+                await self.async_request_refresh()
+            return
+        _LOGGER.warning(
+            "Could not switch off %s after the program ended (remote control enabled?)", serial
+        )
 
     async def async_send_action(self, serial: str, body: dict[str, Any]) -> None:
         """Send an action and refresh state afterwards."""

@@ -29,11 +29,15 @@ CONF_LANGUAGE: Final = "language"
 CONF_USE_PUSH: Final = "use_push"
 CONF_POLL_INTERVAL: Final = "poll_interval"
 CONF_STALE_GRACE: Final = "stale_grace"
+CONF_POWER_OFF_ON_FINISH: Final = "power_off_on_finish"
+CONF_POWER_OFF_DELAY: Final = "power_off_delay"
 
 DEFAULT_LANGUAGE: Final = "auto"
 DEFAULT_USE_PUSH: Final = True
 DEFAULT_POLL_INTERVAL: Final = 60  # seconds, used while push is unavailable
 DEFAULT_STALE_GRACE: Final = 15  # minutes to keep last known state on errors
+DEFAULT_POWER_OFF_ON_FINISH: Final = False
+DEFAULT_POWER_OFF_DELAY: Final = 0  # seconds after the end of a program
 
 # Polling while the push stream is healthy (safety net against missed events)
 HEALTHY_PUSH_POLL_INTERVAL: Final = 600
