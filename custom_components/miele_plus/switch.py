@@ -75,6 +75,9 @@ class MieleSwitch(MieleEntity, SwitchEntity):
         if not super().available:
             return False
         dev = self.device
+        if not dev.is_connected:
+            # Show "off" while the washer is unplugged / offline
+            return True
         desc = self.entity_description
         return desc.on_allowed_fn(dev) or desc.off_allowed_fn(dev)
 

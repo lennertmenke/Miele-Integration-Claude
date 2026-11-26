@@ -38,7 +38,6 @@ class MieleActivityEvent(MieleEntity, EventEntity):
     """Fires on program and signal transitions."""
 
     _attr_event_types = EVENT_TYPES
-    _always_available = True
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to device events."""

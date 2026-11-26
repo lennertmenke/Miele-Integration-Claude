@@ -63,6 +63,7 @@ class MieleButton(MieleEntity, ButtonEntity):
     """Send a process action."""
 
     entity_description: MieleButtonDescription
+    _requires_connection = True
 
     @property
     def available(self) -> bool:

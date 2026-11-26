@@ -28,6 +28,7 @@ class MieleEntity(CoordinatorEntity[MieleCoordinator]):
     """Base class for all Miele entities."""
 
     _attr_has_entity_name = True
+    _requires_connection = False
     entity_description: MieleEntityDescription
 
     def __init__(
@@ -66,8 +67,10 @@ class MieleEntity(CoordinatorEntity[MieleCoordinator]):
         if not super().available or self._serial not in (self.coordinator.data or {}):
             return False
         dev = self.device
-        # Connectivity entities stay available to report "disconnected"
-        if not dev.is_connected and not getattr(self, "_always_available", False):
+        # A switched-off/unplugged washer is a normal state, not an outage:
+        # entities stay available and report "off" / 0. Only controls that
+        # need a reachable appliance opt out via _requires_connection.
+        if not dev.is_connected and self._requires_connection:
             return False
         return self.entity_description.available_fn(dev)
 

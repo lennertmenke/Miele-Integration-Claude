@@ -41,6 +41,8 @@ def program_label(program: dict) -> str:
 class MieleProgramSelect(MieleEntity, SelectEntity):
     """Choose and start a program remotely."""
 
+    _requires_connection = True
+
     @property
     def available(self) -> bool:
         """Available when the appliance offers remote programs."""

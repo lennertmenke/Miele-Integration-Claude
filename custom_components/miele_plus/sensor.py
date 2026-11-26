@@ -44,7 +44,9 @@ class MieleSensorDescription(MieleEntityDescription, SensorEntityDescription):
 
     value_fn: Callable[[MieleDevice], Any]
     attr_fn: Callable[[MieleDevice], dict[str, Any]] | None = None
-    always_available: bool = False
+    # Value reported while the washer is switched off / unplugged (offline)
+    off_value: Any = None
+    use_off_value: bool = True
 
 
 def _in_program(dev: MieleDevice, value: Any, idle: Any = 0) -> Any:
@@ -54,6 +56,7 @@ def _in_program(dev: MieleDevice, value: Any, idle: Any = 0) -> Any:
 SENSORS: tuple[MieleSensorDescription, ...] = (
     MieleSensorDescription(
         key="status",
+        off_value="off",
         translation_key="status",
         device_class=SensorDeviceClass.ENUM,
         options=STATUS_OPTIONS,
@@ -62,7 +65,6 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
             "status_raw": d.status_raw,
             "status_localized": d.status_localized,
         },
-        always_available=True,
     ),
     MieleSensorDescription(
         key="program",
@@ -78,6 +80,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="remaining_time",
+        off_value=0,
         translation_key="remaining_time",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
@@ -86,6 +89,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="elapsed_time",
+        off_value=0,
         translation_key="elapsed_time",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
@@ -94,6 +98,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="progress",
+        off_value=0,
         translation_key="progress",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
@@ -101,6 +106,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="spin_speed",
+        off_value=0,
         translation_key="spin_speed",
         native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
         value_fn=lambda d: _in_program(d, d.spin_speed, None),
@@ -114,6 +120,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="energy_consumption",
+        off_value=0,
         translation_key="energy_consumption",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
@@ -122,6 +129,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="water_consumption",
+        off_value=0,
         translation_key="water_consumption",
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.LITERS,
@@ -148,8 +156,8 @@ FILLING_SENSORS: tuple[MieleSensorDescription, ...] = tuple(
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         exists_fn=lambda d, raw=raw: d.filling_level(raw) is not None,
+        use_off_value=False,
         value_fn=lambda d, raw=raw: d.filling_level(raw),
-        always_available=True,
     )
     for key, raw in (
         ("twin_dos_1_level", "twinDosContainer1FillingLevel"),
@@ -166,7 +174,6 @@ TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         suggested_display_precision=2,
         value_fn=lambda d: d.energy_consumption,
-        always_available=True,
     ),
     MieleSensorDescription(
         key="water_total",
@@ -175,7 +182,6 @@ TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfVolume.LITERS,
         state_class=SensorStateClass.TOTAL_INCREASING,
         value_fn=lambda d: d.water_consumption,
-        always_available=True,
     ),
 )
 
@@ -200,7 +206,6 @@ CONNECTION_DESCRIPTION = MieleSensorDescription(
     options=["push", "polling"],
     entity_category=EntityCategory.DIAGNOSTIC,
     value_fn=lambda d: None,
-    always_available=True,
 )
 
 LAST_UPDATE_DESCRIPTION = MieleSensorDescription(
@@ -210,7 +215,6 @@ LAST_UPDATE_DESCRIPTION = MieleSensorDescription(
     entity_category=EntityCategory.DIAGNOSTIC,
     entity_registry_enabled_default=False,
     value_fn=lambda d: None,
-    always_available=True,
 )
 
 
@@ -254,12 +258,15 @@ class MieleSensor(MieleEntity, SensorEntity):
     ) -> None:
         """Initialize."""
         super().__init__(coordinator, serial, description, suffix)
-        self._always_available = description.always_available
 
     @property
     def native_value(self) -> Any:
         """Return the state."""
-        return self.entity_description.value_fn(self.device)
+        dev = self.device
+        desc = self.entity_description
+        if not dev.is_connected and desc.use_off_value:
+            return desc.off_value
+        return desc.value_fn(dev)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
@@ -391,7 +398,6 @@ class MieleTotalSensor(MieleEntity, RestoreSensor):
     ) -> None:
         """Initialize."""
         super().__init__(coordinator, serial, description)
-        self._always_available = True
         self._total: float = 0.0
         self._last: float | None = None
 

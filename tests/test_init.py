@@ -168,3 +168,32 @@ async def test_elapsed_kept_and_auto_power_off(
     coordinator._handle_push_event("devices", {SERIAL_WM: update})
     await hass.async_block_till_done()
     assert _state(hass, "sensor.waschmaschine_elapsed_time") == "0"
+
+
+async def test_offline_washer_reports_off(
+    hass: HomeAssistant, setup_integration: MockConfigEntry, devices: dict[str, Any]
+) -> None:
+    """Plug switched off -> Miele reports 'not connected' -> entities show off/0."""
+    coordinator = setup_integration.runtime_data
+    update = copy.deepcopy(devices[SERIAL_WM])
+    update["state"]["status"] = {"value_raw": 255, "value_localized": "Nicht verbunden"}
+    for key in ("remainingTime", "elapsedTime"):
+        update["state"][key] = [0, 0]
+    update["state"]["ProgramID"] = {"value_raw": 0, "value_localized": ""}
+    update["state"]["ecoFeedback"] = None
+    update["state"]["signalDoor"] = None
+    coordinator._handle_push_event("devices", {SERIAL_WM: update})
+    await hass.async_block_till_done()
+
+    assert _state(hass, "sensor.waschmaschine_status") == "off"
+    assert hass.states.get("sensor.waschmaschine_status").attributes["status_raw"] == 255
+    assert _state(hass, "sensor.waschmaschine_remaining_time") == "0"
+    assert _state(hass, "sensor.waschmaschine_progress") == "0"
+    assert _state(hass, "sensor.waschmaschine_program_energy") == "0"
+    assert _state(hass, "sensor.waschmaschine_twindos_1_level") == "68"
+    assert _state(hass, "binary_sensor.waschmaschine_running") == "off"
+    assert _state(hass, "binary_sensor.waschmaschine_door") == "off"
+    assert _state(hass, "binary_sensor.waschmaschine_connectivity") == "off"
+    assert _state(hass, "switch.waschmaschine_power") == "off"
+    # Controls that need a reachable washer stay unavailable
+    assert _state(hass, "button.waschmaschine_stop") == STATE_UNAVAILABLE

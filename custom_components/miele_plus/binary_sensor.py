@@ -27,7 +27,6 @@ class MieleBinarySensorDescription(MieleEntityDescription, BinarySensorEntityDes
     """Describes a Miele binary sensor."""
 
     value_fn: Callable[[MieleDevice], bool | None]
-    always_available: bool = False
 
 
 BINARY_SENSORS: tuple[MieleBinarySensorDescription, ...] = (
@@ -36,7 +35,6 @@ BINARY_SENSORS: tuple[MieleBinarySensorDescription, ...] = (
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda d: d.is_connected,
-        always_available=True,
     ),
     MieleBinarySensorDescription(
         key="running",
@@ -106,9 +104,11 @@ class MieleBinarySensor(MieleEntity, BinarySensorEntity):
     def __init__(self, coordinator, serial, description) -> None:  # type: ignore[no-untyped-def]
         """Initialize."""
         super().__init__(coordinator, serial, description)
-        self._always_available = description.always_available
 
     @property
     def is_on(self) -> bool | None:
-        """Return the state."""
-        return self.entity_description.value_fn(self.device)
+        """Return the state (everything is off while the washer is offline)."""
+        dev = self.device
+        if not dev.is_connected and self.entity_description.key != "connected":
+            return False
+        return self.entity_description.value_fn(dev)
