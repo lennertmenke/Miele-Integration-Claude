@@ -1,0 +1,52 @@
+{
+  "entity": {
+    "sensor": {
+      "status": { "default": "mdi:state-machine" },
+      "program": { "default": "mdi:format-list-bulleted" },
+      "program_phase": { "default": "mdi:progress-wrench" },
+      "remaining_time": { "default": "mdi:timer-sand" },
+      "elapsed_time": { "default": "mdi:timer-outline" },
+      "progress": { "default": "mdi:progress-clock" },
+      "finish_time": { "default": "mdi:flag-checkered" },
+      "start_time": { "default": "mdi:clock-start" },
+      "spin_speed": { "default": "mdi:sync" },
+      "drying_step": { "default": "mdi:tumble-dryer" },
+      "ventilation_step": { "default": "mdi:fan" },
+      "energy_forecast": { "default": "mdi:lightning-bolt-outline" },
+      "water_forecast": { "default": "mdi:water-outline" },
+      "plate": { "default": "mdi:stove" },
+      "update_mode": { "default": "mdi:cloud-sync" },
+      "last_update": { "default": "mdi:update" }
+    },
+    "binary_sensor": {
+      "info": { "default": "mdi:information-outline" },
+      "remote_control": { "default": "mdi:remote" },
+      "smart_grid": { "default": "mdi:transmission-tower" },
+      "mobile_start": { "default": "mdi:cellphone-arrow-down" }
+    },
+    "button": {
+      "start": { "default": "mdi:play" },
+      "stop": { "default": "mdi:stop" },
+      "pause": { "default": "mdi:pause" }
+    },
+    "switch": {
+      "power": { "default": "mdi:power" },
+      "superfreezing": { "default": "mdi:snowflake-alert" },
+      "supercooling": { "default": "mdi:snowflake" }
+    },
+    "select": {
+      "program_select": { "default": "mdi:playlist-play" },
+      "ventilation_select": { "default": "mdi:fan" }
+    },
+    "event": {
+      "activity": { "default": "mdi:bell-ring-outline" }
+    }
+  },
+  "services": {
+    "start_program": { "service": "mdi:play-circle" },
+    "set_start_time": { "service": "mdi:clock-start" },
+    "send_action": { "service": "mdi:send" },
+    "refresh": { "service": "mdi:refresh" },
+    "get_programs": { "service": "mdi:format-list-bulleted" }
+  }
+}

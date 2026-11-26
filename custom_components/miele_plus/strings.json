@@ -1,0 +1,350 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Pick authentication method"
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "The Miele integration needs to re-authenticate your account."
+      }
+    },
+    "abort": {
+      "already_configured": "Account is already configured",
+      "reauth_successful": "Re-authentication was successful",
+      "wrong_account": "You signed in with a different Miele account.",
+      "missing_credentials": "Application credentials are missing. Register an app at the Miele developer portal and add the client ID/secret.",
+      "authorize_url_timeout": "Timeout generating authorize URL.",
+      "no_url_available": "No URL available.",
+      "oauth_error": "Received invalid token data.",
+      "oauth_failed": "Error while obtaining access token.",
+      "oauth_timeout": "Timeout resolving OAuth token.",
+      "oauth_unauthorized": "OAuth authorization error.",
+      "user_rejected_authorize": "Account linking rejected."
+    },
+    "create_entry": {
+      "default": "Successfully authenticated"
+    }
+  },
+  "application_credentials": {
+    "description": "Register an application at {developer_url} and use {redirect_url} as redirect URI."
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Miele Plus options",
+        "data": {
+          "language": "Language of program/phase names",
+          "use_push": "Use push updates (event stream)",
+          "poll_interval": "Polling interval when push is unavailable",
+          "stale_grace": "Keep last known state on cloud errors for"
+        },
+        "data_description": {
+          "stale_grace": "Entities stay available with their last values during short Miele cloud outages instead of becoming unavailable.",
+          "poll_interval": "While a program is running, at most 30 s is used."
+        }
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "auto": "Home Assistant language",
+        "de": "Deutsch",
+        "en": "English",
+        "fr": "Français",
+        "it": "Italiano",
+        "nl": "Nederlands",
+        "es": "Español",
+        "pl": "Polski",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk",
+        "fi": "Suomi",
+        "cs": "Čeština"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "program": {
+        "name": "Program"
+      },
+      "program_phase": {
+        "name": "Program phase"
+      },
+      "remaining_time": {
+        "name": "Remaining time"
+      },
+      "elapsed_time": {
+        "name": "Elapsed time"
+      },
+      "progress": {
+        "name": "Progress"
+      },
+      "finish_time": {
+        "name": "Finish time"
+      },
+      "start_time": {
+        "name": "Start time"
+      },
+      "spin_speed": {
+        "name": "Spin speed"
+      },
+      "drying_step": {
+        "name": "Drying step"
+      },
+      "target_temperature": {
+        "name": "Target temperature"
+      },
+      "core_temperature": {
+        "name": "Core temperature"
+      },
+      "core_target_temperature": {
+        "name": "Core target temperature"
+      },
+      "ventilation_step": {
+        "name": "Fan level"
+      },
+      "energy_consumption": {
+        "name": "Program energy"
+      },
+      "water_consumption": {
+        "name": "Program water"
+      },
+      "energy_forecast": {
+        "name": "Energy forecast"
+      },
+      "water_forecast": {
+        "name": "Water forecast"
+      },
+      "energy_total": {
+        "name": "Energy total"
+      },
+      "water_total": {
+        "name": "Water total"
+      },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "temperature_zone": {
+        "name": "Temperature zone {zone}"
+      },
+      "plate": {
+        "name": "Cooking zone {plate}"
+      },
+      "last_update": {
+        "name": "Last update"
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "off": "Off",
+          "on": "On",
+          "programmed": "Programmed",
+          "waiting_to_start": "Waiting to start",
+          "running": "Running",
+          "pause": "Paused",
+          "program_ended": "Program ended",
+          "failure": "Failure",
+          "program_interrupted": "Program interrupted",
+          "idle": "Idle",
+          "rinse_hold": "Rinse hold",
+          "service": "Service",
+          "superfreezing": "Superfreezing",
+          "supercooling": "Supercooling",
+          "superheating": "Superheating",
+          "default": "Default",
+          "locked": "Locked",
+          "supercooling_superfreezing": "Supercooling & superfreezing",
+          "not_connected": "Not connected",
+          "unknown": "Unknown"
+        }
+      },
+      "update_mode": {
+        "name": "Update mode",
+        "state": {
+          "push": "Push",
+          "polling": "Polling"
+        }
+      }
+    },
+    "binary_sensor": {
+      "running": {
+        "name": "Running"
+      },
+      "failure": {
+        "name": "Failure"
+      },
+      "info": {
+        "name": "Notification"
+      },
+      "remote_control": {
+        "name": "Remote control"
+      },
+      "smart_grid": {
+        "name": "SmartGrid"
+      },
+      "mobile_start": {
+        "name": "MobileStart"
+      }
+    },
+    "button": {
+      "start": {
+        "name": "Start"
+      },
+      "stop": {
+        "name": "Stop"
+      },
+      "pause": {
+        "name": "Pause"
+      }
+    },
+    "switch": {
+      "power": {
+        "name": "Power"
+      },
+      "superfreezing": {
+        "name": "SuperFrost"
+      },
+      "supercooling": {
+        "name": "SuperCool"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Light"
+      },
+      "ambient_light": {
+        "name": "Ambient light"
+      }
+    },
+    "number": {
+      "target_temperature": {
+        "name": "Target temperature"
+      },
+      "target_temperature_zone": {
+        "name": "Target temperature zone {zone}"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Start program"
+      },
+      "ventilation_select": {
+        "name": "Fan level"
+      }
+    },
+    "event": {
+      "activity": {
+        "name": "Activity",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "program_started": "Program started",
+              "program_finished": "Program finished",
+              "program_aborted": "Program aborted",
+              "program_paused": "Program paused",
+              "program_resumed": "Program resumed",
+              "failure": "Failure",
+              "info": "Information",
+              "door_opened": "Door opened",
+              "door_closed": "Door closed"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_device": {
+      "message": "Device {device_id} is not a loaded Miele Plus device."
+    },
+    "unknown_program": {
+      "message": "Program '{program}' is not available on this appliance."
+    },
+    "program_required": {
+      "message": "Either program_id or program must be given."
+    }
+  },
+  "services": {
+    "start_program": {
+      "name": "Start program",
+      "description": "Start a program with optional parameters.",
+      "fields": {
+        "device_id": {
+          "name": "Appliance",
+          "description": "Miele appliance."
+        },
+        "program_id": {
+          "name": "Program ID",
+          "description": "Numeric program ID (see get_programs)."
+        },
+        "program": {
+          "name": "Program name",
+          "description": "Program name as shown by Miele."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Target temperature (ovens)."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Program duration (ovens)."
+        },
+        "start_delay": {
+          "name": "Start delay",
+          "description": "Delay the start by this time."
+        }
+      }
+    },
+    "set_start_time": {
+      "name": "Set start delay",
+      "description": "Delay the start of the selected program.",
+      "fields": {
+        "device_id": {
+          "name": "Appliance",
+          "description": "Miele appliance."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time until the program starts."
+        }
+      }
+    },
+    "send_action": {
+      "name": "Send raw action",
+      "description": "Send any action supported by the Miele API.",
+      "fields": {
+        "device_id": {
+          "name": "Appliance",
+          "description": "Miele appliance."
+        },
+        "action": {
+          "name": "Action",
+          "description": "JSON body, e.g. {\"processAction\": 1}."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Refresh",
+      "description": "Force a refresh from the Miele cloud.",
+      "fields": {
+        "device_id": {
+          "name": "Appliance",
+          "description": "Optional: only this appliance's account."
+        }
+      }
+    },
+    "get_programs": {
+      "name": "Get programs",
+      "description": "Return the programs that can be started remotely.",
+      "fields": {
+        "device_id": {
+          "name": "Appliance",
+          "description": "Miele appliance."
+        }
+      }
+    }
+  }
+}

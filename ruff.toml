@@ -1,0 +1,11 @@
+target-version = "py313"
+line-length = 100
+
+[lint]
+select = ["E", "F", "W", "B", "UP", "I"]
+ignore = ["E501", "UP040", "B008"]
+
+[lint.isort]
+known-first-party = ["custom_components"]
+force-sort-within-sections = true
+combine-as-imports = true

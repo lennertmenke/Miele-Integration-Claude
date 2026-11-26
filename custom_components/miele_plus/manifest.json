@@ -1,0 +1,14 @@
+{
+  "domain": "miele_plus",
+  "name": "Miele Plus",
+  "codeowners": ["@lennertmenke"],
+  "config_flow": true,
+  "dependencies": ["application_credentials"],
+  "documentation": "https://github.com/lennertmenke/Miele-Integration-Claude",
+  "integration_type": "hub",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/lennertmenke/Miele-Integration-Claude/issues",
+  "loggers": ["custom_components.miele_plus"],
+  "requirements": [],
+  "version": "1.0.0"
+}

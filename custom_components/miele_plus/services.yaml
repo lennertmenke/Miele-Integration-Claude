@@ -1,0 +1,67 @@
+start_program:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: miele_plus
+    program_id:
+      example: 1
+      selector:
+        number:
+          min: 0
+          max: 100000
+          mode: box
+    program:
+      example: "Cottons"
+      selector:
+        text:
+    temperature:
+      selector:
+        number:
+          min: 0
+          max: 300
+          unit_of_measurement: "°C"
+          mode: box
+    duration:
+      selector:
+        duration:
+    start_delay:
+      selector:
+        duration:
+set_start_time:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: miele_plus
+    delay:
+      required: true
+      selector:
+        duration:
+send_action:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: miele_plus
+    action:
+      required: true
+      example: '{"processAction": 1}'
+      selector:
+        object:
+refresh:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: miele_plus
+get_programs:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: miele_plus

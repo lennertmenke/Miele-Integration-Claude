@@ -1,0 +1,350 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Authentifizierungsmethode wählen"
+      },
+      "reauth_confirm": {
+        "title": "Erneut anmelden",
+        "description": "Die Miele-Integration muss dein Konto erneut anmelden."
+      }
+    },
+    "abort": {
+      "already_configured": "Konto ist bereits eingerichtet",
+      "reauth_successful": "Erneute Anmeldung erfolgreich",
+      "wrong_account": "Du hast dich mit einem anderen Miele-Konto angemeldet.",
+      "missing_credentials": "Anwendungs-Zugangsdaten fehlen. Registriere eine App im Miele-Entwicklerportal und hinterlege Client-ID/Secret.",
+      "authorize_url_timeout": "Zeitüberschreitung beim Erzeugen der Autorisierungs-URL.",
+      "no_url_available": "Keine URL verfügbar.",
+      "oauth_error": "Ungültige Token-Daten erhalten.",
+      "oauth_failed": "Fehler beim Abrufen des Zugriffstokens.",
+      "oauth_timeout": "Zeitüberschreitung beim OAuth-Token.",
+      "oauth_unauthorized": "OAuth-Autorisierungsfehler.",
+      "user_rejected_authorize": "Kontoverknüpfung abgelehnt."
+    },
+    "create_entry": {
+      "default": "Erfolgreich angemeldet"
+    }
+  },
+  "application_credentials": {
+    "description": "Registriere eine Anwendung unter {developer_url} und verwende {redirect_url} als Redirect-URI."
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Miele Plus Optionen",
+        "data": {
+          "language": "Sprache der Programm-/Phasennamen",
+          "use_push": "Push-Updates verwenden (Event-Stream)",
+          "poll_interval": "Abfrageintervall ohne Push",
+          "stale_grace": "Letzten Zustand bei Cloud-Fehlern behalten für"
+        },
+        "data_description": {
+          "stale_grace": "Entitäten bleiben bei kurzen Ausfällen der Miele-Cloud mit ihren letzten Werten verfügbar, statt auf 'nicht verfügbar' zu springen.",
+          "poll_interval": "Während ein Programm läuft, wird höchstens 30 s verwendet."
+        }
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "auto": "Sprache von Home Assistant",
+        "de": "Deutsch",
+        "en": "English",
+        "fr": "Français",
+        "it": "Italiano",
+        "nl": "Nederlands",
+        "es": "Español",
+        "pl": "Polski",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk",
+        "fi": "Suomi",
+        "cs": "Čeština"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "program": {
+        "name": "Programm"
+      },
+      "program_phase": {
+        "name": "Programmphase"
+      },
+      "remaining_time": {
+        "name": "Restzeit"
+      },
+      "elapsed_time": {
+        "name": "Laufzeit"
+      },
+      "progress": {
+        "name": "Fortschritt"
+      },
+      "finish_time": {
+        "name": "Endzeit"
+      },
+      "start_time": {
+        "name": "Startzeit"
+      },
+      "spin_speed": {
+        "name": "Schleuderdrehzahl"
+      },
+      "drying_step": {
+        "name": "Trockenstufe"
+      },
+      "target_temperature": {
+        "name": "Zieltemperatur"
+      },
+      "core_temperature": {
+        "name": "Kerntemperatur"
+      },
+      "core_target_temperature": {
+        "name": "Kern-Zieltemperatur"
+      },
+      "ventilation_step": {
+        "name": "Lüfterstufe"
+      },
+      "energy_consumption": {
+        "name": "Energie (Programm)"
+      },
+      "water_consumption": {
+        "name": "Wasser (Programm)"
+      },
+      "energy_forecast": {
+        "name": "Energieprognose"
+      },
+      "water_forecast": {
+        "name": "Wasserprognose"
+      },
+      "energy_total": {
+        "name": "Energie gesamt"
+      },
+      "water_total": {
+        "name": "Wasser gesamt"
+      },
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "temperature_zone": {
+        "name": "Temperatur Zone {zone}"
+      },
+      "plate": {
+        "name": "Kochzone {plate}"
+      },
+      "last_update": {
+        "name": "Letzte Aktualisierung"
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "off": "Aus",
+          "on": "Ein",
+          "programmed": "Programmiert",
+          "waiting_to_start": "Startvorwahl aktiv",
+          "running": "In Betrieb",
+          "pause": "Pause",
+          "program_ended": "Programm beendet",
+          "failure": "Störung",
+          "program_interrupted": "Programm abgebrochen",
+          "idle": "Bereit",
+          "rinse_hold": "Spülstopp",
+          "service": "Service",
+          "superfreezing": "SuperFrost",
+          "supercooling": "SuperKühlen",
+          "superheating": "Superheizen",
+          "default": "Standard",
+          "locked": "Gesperrt",
+          "supercooling_superfreezing": "SuperKühlen & SuperFrost",
+          "not_connected": "Nicht verbunden",
+          "unknown": "Unbekannt"
+        }
+      },
+      "update_mode": {
+        "name": "Aktualisierungsmodus",
+        "state": {
+          "push": "Push",
+          "polling": "Abfrage"
+        }
+      }
+    },
+    "binary_sensor": {
+      "running": {
+        "name": "In Betrieb"
+      },
+      "failure": {
+        "name": "Störung"
+      },
+      "info": {
+        "name": "Hinweis"
+      },
+      "remote_control": {
+        "name": "Fernsteuerung"
+      },
+      "smart_grid": {
+        "name": "SmartGrid"
+      },
+      "mobile_start": {
+        "name": "MobileStart"
+      }
+    },
+    "button": {
+      "start": {
+        "name": "Start"
+      },
+      "stop": {
+        "name": "Stop"
+      },
+      "pause": {
+        "name": "Pause"
+      }
+    },
+    "switch": {
+      "power": {
+        "name": "Ein/Aus"
+      },
+      "superfreezing": {
+        "name": "SuperFrost"
+      },
+      "supercooling": {
+        "name": "SuperKühlen"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Beleuchtung"
+      },
+      "ambient_light": {
+        "name": "Ambientebeleuchtung"
+      }
+    },
+    "number": {
+      "target_temperature": {
+        "name": "Zieltemperatur"
+      },
+      "target_temperature_zone": {
+        "name": "Zieltemperatur Zone {zone}"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Programm starten"
+      },
+      "ventilation_select": {
+        "name": "Lüfterstufe"
+      }
+    },
+    "event": {
+      "activity": {
+        "name": "Aktivität",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "program_started": "Programm gestartet",
+              "program_finished": "Programm beendet",
+              "program_aborted": "Programm abgebrochen",
+              "program_paused": "Programm pausiert",
+              "program_resumed": "Programm fortgesetzt",
+              "failure": "Störung",
+              "info": "Hinweis",
+              "door_opened": "Tür geöffnet",
+              "door_closed": "Tür geschlossen"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_device": {
+      "message": "Gerät {device_id} ist kein geladenes Miele-Plus-Gerät."
+    },
+    "unknown_program": {
+      "message": "Programm '{program}' ist auf diesem Gerät nicht verfügbar."
+    },
+    "program_required": {
+      "message": "Es muss program_id oder program angegeben werden."
+    }
+  },
+  "services": {
+    "start_program": {
+      "name": "Programm starten",
+      "description": "Startet ein Programm mit optionalen Parametern.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Miele-Gerät."
+        },
+        "program_id": {
+          "name": "Program ID",
+          "description": "Numerische Programm-ID (siehe get_programs)."
+        },
+        "program": {
+          "name": "Programmname",
+          "description": "Programmname wie von Miele angezeigt."
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Zieltemperatur (Backöfen)."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Programmdauer (Backöfen)."
+        },
+        "start_delay": {
+          "name": "Startvorwahl",
+          "description": "Start um diese Zeit verzögern."
+        }
+      }
+    },
+    "set_start_time": {
+      "name": "Startvorwahl setzen",
+      "description": "Verzögert den Start des gewählten Programms.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Miele-Gerät."
+        },
+        "delay": {
+          "name": "Verzögerung",
+          "description": "Zeit bis zum Programmstart."
+        }
+      }
+    },
+    "send_action": {
+      "name": "Rohe Aktion senden",
+      "description": "Sendet eine beliebige von der Miele-API unterstützte Aktion.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Miele-Gerät."
+        },
+        "action": {
+          "name": "Aktion",
+          "description": "JSON-Body, z. B. {\"processAction\": 1}."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Aktualisieren",
+      "description": "Erzwingt eine Aktualisierung aus der Miele-Cloud.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Optional: nur das Konto dieses Geräts."
+        }
+      }
+    },
+    "get_programs": {
+      "name": "Programme abrufen",
+      "description": "Gibt die fernstartbaren Programme zurück.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Miele-Gerät."
+        }
+      }
+    }
+  }
+}
