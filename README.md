@@ -4,8 +4,8 @@ Eine eigenständige Custom Integration (`miele_plus`) für die Miele 3rd-Party-C
 Sie läuft **parallel** zur offiziellen `miele`-Integration (andere Domain) und legt den
 Schwerpunkt auf **Zuverlässigkeit** und **Automationsfreundlichkeit**.
 
-> **Unterstützte Geräte:** derzeit ausschließlich **Waschmaschinen** (inkl. Waschtrockner).
-> Andere Miele-Geräte im Konto werden ignoriert.
+> **Unterstützte Geräte:** **Waschmaschinen** (inkl. Waschtrockner) und **Backöfen /
+> Dampfbacköfen** (z. B. DGC 7450). Andere Miele-Geräte im Konto werden ignoriert.
 
 ## Was ist besser als bei der offiziellen Integration?
 
@@ -45,6 +45,31 @@ Diagnose-Sensor **„Aktualisierungsmodus“** (`push`/`polling`) mit Statistike
 - Schalter Ein/Aus (optimistisch, mit Rückfall)
 - Status als übersetzte **Enum** (sprachunabhängig in Automationen: `running`, `program_ended`, …)
 - Sprache der Programm-/Phasennamen frei wählbar
+
+## Backofen & Rezepte
+
+Für Backöfen und Dampfbacköfen (z. B. **DGC 7450**) gibt es zusätzlich:
+
+- Garraumtemperatur, Zieltemperatur, Kerntemperatur (Speisenthermometer)
+- **Zieltemperatur ändern** während ein Programm läuft
+- Backofenbeleuchtung ein/aus
+- Ereignis **„Temperatur erreicht“** (einmal pro Aufheizvorgang, z. B. „Vorheizen fertig“)
+
+### Rezepte
+Unter *Einstellungen → Geräte & Dienste → Miele Plus → „Rezept hinzufügen“* legst du Rezepte an:
+Name, Programm (Liste kommt direkt vom Ofen), Temperatur, Dauer, optional Kerntemperatur und
+zusätzliche API-Parameter. Jedes Rezept erscheint als Knopf **„Rezept: …“** am Ofen. Ein Klick:
+
+1. schaltet den Ofen ein (falls aus und per Fernzugriff erlaubt),
+2. stellt Programm, Temperatur und Dauer ein und startet,
+3. löst das Ereignis `recipe_started` aus.
+
+Rezepte lassen sich jederzeit über „Konfigurieren“ am Rezept bearbeiten.
+
+> Voraussetzung: Am Ofen muss die **Fernsteuerung (MobileStart)** aktiviert sein. Welche
+> Programme und Parameter per Fernzugriff erlaubt sind, legt Miele fest – die Liste im
+> Rezept-Dialog zeigt genau das, was der Ofen meldet. Ungültige Werte werden schon beim
+> Klick abgelehnt.
 
 ## Installation
 

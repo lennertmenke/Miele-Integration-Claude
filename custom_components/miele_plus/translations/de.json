@@ -29,6 +29,68 @@
   "application_credentials": {
     "description": "Registriere eine Anwendung unter {developer_url} und verwende {redirect_url} als Redirect-URI."
   },
+  "config_subentries": {
+    "recipe": {
+      "initiate_flow": {
+        "user": "Rezept hinzufügen"
+      },
+      "entry_type": "Rezept",
+      "step": {
+        "user": {
+          "title": "Backofen wählen",
+          "data": {
+            "device": "Backofen"
+          }
+        },
+        "recipe": {
+          "title": "Neues Rezept",
+          "description": "Wähle ein Programm und die Backparameter. Leere Felder verwenden die Standardwerte des Ofens.",
+          "data": {
+            "name": "Name",
+            "program_id": "Programm",
+            "temperature": "Temperatur",
+            "duration": "Dauer",
+            "core_temperature": "Kerntemperatur (Speisenthermometer)",
+            "extra_parameters": "Zusätzliche API-Parameter (für Fortgeschrittene)",
+            "notes": "Notizen"
+          },
+          "data_description": {
+            "program_id": "Programme, die der Ofen für den Fernstart anbietet. Du kannst auch eine Programmnummer eingeben.",
+            "duration": "Optional, in Minuten.",
+            "core_temperature": "Nur wenn das Programm das Speisenthermometer per Fernzugriff unterstützt.",
+            "extra_parameters": "Wird unverändert an Miele gesendet, z. B. für Dampf-Einstellungen, sobald bekannt."
+          }
+        },
+        "reconfigure": {
+          "title": "Rezept bearbeiten",
+          "data": {
+            "name": "Name",
+            "program_id": "Programm",
+            "temperature": "Temperatur",
+            "duration": "Dauer",
+            "core_temperature": "Kerntemperatur (Speisenthermometer)",
+            "extra_parameters": "Zusätzliche API-Parameter (für Fortgeschrittene)",
+            "notes": "Notizen"
+          },
+          "data_description": {
+            "program_id": "Programme, die der Ofen für den Fernstart anbietet. Du kannst auch eine Programmnummer eingeben.",
+            "duration": "Optional, in Minuten.",
+            "core_temperature": "Nur wenn das Programm das Speisenthermometer per Fernzugriff unterstützt.",
+            "extra_parameters": "Wird unverändert an Miele gesendet, z. B. für Dampf-Einstellungen, sobald bekannt."
+          }
+        }
+      },
+      "abort": {
+        "no_oven": "Kein Miele-Backofen gefunden. Rezepte kannst du anlegen, sobald der Ofen verbunden ist.",
+        "entry_not_loaded": "Miele Plus ist nicht geladen.",
+        "reconfigure_successful": "Rezept gespeichert"
+      },
+      "error": {
+        "invalid_program": "Wähle ein Programm aus der Liste oder gib dessen Nummer ein.",
+        "invalid_extra": "Zusätzliche Parameter müssen ein Objekt sein, z. B. {\"steam\": 1}."
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
@@ -116,6 +178,15 @@
       "water_total": {
         "name": "Wasser gesamt"
       },
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "core_temperature": {
+        "name": "Kerntemperatur"
+      },
+      "core_target_temperature": {
+        "name": "Kern-Zieltemperatur"
+      },
       "twin_dos_1_level": {
         "name": "TwinDos 1 Füllstand"
       },
@@ -183,6 +254,19 @@
       },
       "pause": {
         "name": "Pause"
+      },
+      "recipe": {
+        "name": "Rezept: {recipe}"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Beleuchtung"
+      }
+    },
+    "number": {
+      "set_target_temperature": {
+        "name": "Zieltemperatur einstellen"
       }
     },
     "switch": {
@@ -209,7 +293,9 @@
               "failure": "Störung",
               "info": "Hinweis",
               "door_opened": "Tür geöffnet",
-              "door_closed": "Tür geschlossen"
+              "door_closed": "Tür geschlossen",
+              "temperature_reached": "Temperatur erreicht",
+              "recipe_started": "Rezept gestartet"
             }
           }
         }
@@ -222,6 +308,21 @@
     },
     "unknown_program": {
       "message": "Programm '{program}' ist auf diesem Gerät nicht verfügbar."
+    },
+    "device_offline": {
+      "message": "{device} ist nicht erreichbar. Ist das Gerät mit WLAN und Strom verbunden?"
+    },
+    "power_on_not_allowed": {
+      "message": "{device} ist aus und kann nicht per Fernzugriff eingeschaltet werden. Aktiviere die Fernsteuerung am Gerät oder schalte es ein."
+    },
+    "power_on_failed": {
+      "message": "{device} hat sich nicht rechtzeitig eingeschaltet."
+    },
+    "core_temperature_unsupported": {
+      "message": "Programm '{program}' nimmt per Fernzugriff keine Kerntemperatur an."
+    },
+    "value_out_of_range": {
+      "message": "{field} {value} liegt außerhalb des erlaubten Bereichs {min}–{max}."
     },
     "program_required": {
       "message": "Es muss program_id oder program angegeben werden."

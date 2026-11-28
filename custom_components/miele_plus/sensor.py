@@ -44,9 +44,24 @@ class MieleSensorDescription(MieleEntityDescription, SensorEntityDescription):
 
     value_fn: Callable[[MieleDevice], Any]
     attr_fn: Callable[[MieleDevice], dict[str, Any]] | None = None
-    # Value reported while the washer is switched off / unplugged (offline)
+    # Value reported while the appliance is offline (e.g. smart plug off)
     off_value: Any = None
     use_off_value: bool = True
+    # Also report off_value while the appliance is connected but switched off
+    off_when_switched_off: bool = False
+
+
+# Placeholder for a localized "Off" text on free-text sensors
+OFF_TEXT = object()
+OFF_TEXTS = {"de": "Aus", "en": "Off", "fr": "Arrêt", "it": "Spento", "nl": "Uit", "es": "Apagado"}
+
+
+def _washer(dev: MieleDevice) -> bool:
+    return dev.is_washer
+
+
+def _oven(dev: MieleDevice) -> bool:
+    return dev.is_oven
 
 
 def _in_program(dev: MieleDevice, value: Any, idle: Any = 0) -> Any:
@@ -68,12 +83,16 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="program",
+        off_value=OFF_TEXT,
+        off_when_switched_off=True,
         translation_key="program",
         value_fn=lambda d: d.program_name,
         attr_fn=lambda d: {"program_id": d.program_id, "program_type": d.program_type},
     ),
     MieleSensorDescription(
         key="program_phase",
+        off_value=OFF_TEXT,
+        off_when_switched_off=True,
         translation_key="program_phase",
         value_fn=lambda d: _in_program(d, d.program_phase, None),
         attr_fn=lambda d: {"program_phase_raw": d.program_phase_raw},
@@ -106,6 +125,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="spin_speed",
+        exists_fn=_washer,
         off_value=0,
         translation_key="spin_speed",
         native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
@@ -120,6 +140,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="energy_consumption",
+        exists_fn=_washer,
         off_value=0,
         translation_key="energy_consumption",
         device_class=SensorDeviceClass.ENERGY,
@@ -129,6 +150,7 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="water_consumption",
+        exists_fn=_washer,
         off_value=0,
         translation_key="water_consumption",
         device_class=SensorDeviceClass.WATER,
@@ -137,15 +159,43 @@ SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="energy_forecast",
+        exists_fn=_washer,
         translation_key="energy_forecast",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda d: d.energy_forecast,
     ),
     MieleSensorDescription(
         key="water_forecast",
+        exists_fn=_washer,
         translation_key="water_forecast",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda d: d.water_forecast,
+    ),
+    MieleSensorDescription(
+        key="temperature",
+        exists_fn=_oven,
+        translation_key="temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.temperature(0),
+    ),
+    MieleSensorDescription(
+        key="core_temperature",
+        exists_fn=_oven,
+        translation_key="core_temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: d.core_temperature,
+    ),
+    MieleSensorDescription(
+        key="core_target_temperature",
+        exists_fn=_oven,
+        translation_key="core_target_temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        value_fn=lambda d: d.core_target_temperature,
     ),
 )
 
@@ -155,7 +205,7 @@ FILLING_SENSORS: tuple[MieleSensorDescription, ...] = tuple(
         translation_key=key,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        exists_fn=lambda d, raw=raw: d.filling_level(raw) is not None,
+        exists_fn=lambda d, raw=raw: d.is_washer and d.filling_level(raw) is not None,
         use_off_value=False,
         value_fn=lambda d, raw=raw: d.filling_level(raw),
     )
@@ -168,6 +218,7 @@ FILLING_SENSORS: tuple[MieleSensorDescription, ...] = tuple(
 TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
     MieleSensorDescription(
         key="energy_total",
+        exists_fn=_washer,
         translation_key="energy_total",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
@@ -177,6 +228,7 @@ TOTAL_SENSORS: tuple[MieleSensorDescription, ...] = (
     ),
     MieleSensorDescription(
         key="water_total",
+        exists_fn=_washer,
         translation_key="water_total",
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.LITERS,
@@ -264,7 +316,12 @@ class MieleSensor(MieleEntity, SensorEntity):
         """Return the state."""
         dev = self.device
         desc = self.entity_description
-        if not dev.is_connected and desc.use_off_value:
+        offline = not dev.is_connected
+        switched_off = desc.off_when_switched_off and dev.status_raw == MieleStatus.OFF
+        if desc.use_off_value and (offline or switched_off):
+            if desc.off_value is OFF_TEXT:
+                language = self.coordinator.api.language.split("-")[0]
+                return OFF_TEXTS.get(language, OFF_TEXTS["en"])
             return desc.off_value
         return desc.value_fn(dev)
 

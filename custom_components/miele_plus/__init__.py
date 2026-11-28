@@ -14,7 +14,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .api import MieleApi, MieleAuthError
 from .const import CONF_LANGUAGE, DEFAULT_LANGUAGE, DOMAIN
-from .coordinator import MieleConfigEntry, MieleCoordinator
+from .coordinator import MieleConfigEntry, MieleCoordinator, subentry_snapshot
 from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,6 +23,8 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
     Platform.EVENT,
+    Platform.LIGHT,
+    Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
     Platform.SWITCH,
@@ -78,16 +80,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: MieleConfigEntry) -> boo
 
 
 async def _async_update_listener(hass: HomeAssistant, entry: MieleConfigEntry) -> None:
-    # Token refreshes also update the entry - only reload on option changes
-    if dict(entry.options) != entry.runtime_data.options_snapshot:
+    # Token refreshes also update the entry - only reload when options or
+    # recipes (subentries) changed
+    coordinator = entry.runtime_data
+    if (
+        dict(entry.options) != coordinator.options_snapshot
+        or subentry_snapshot(entry) != coordinator.subentry_snapshot
+    ):
         await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: MieleConfigEntry) -> bool:
     """Unload a config entry."""
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unloaded:
-        await entry.runtime_data.async_shutdown()
+    coordinator = getattr(entry, "runtime_data", None)
+    if unloaded and coordinator is not None:
+        await coordinator.async_shutdown()
     return unloaded
 
 

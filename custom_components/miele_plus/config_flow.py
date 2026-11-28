@@ -10,7 +10,9 @@ from typing import Any
 
 from homeassistant.config_entries import (
     SOURCE_REAUTH,
+    ConfigEntry,
     ConfigFlowResult,
+    ConfigSubentryFlow,
     OptionsFlow,
 )
 from homeassistant.core import callback
@@ -40,8 +42,10 @@ from .const import (
     DEFAULT_USE_PUSH,
     DOMAIN,
     OAUTH2_SCOPES,
+    SUBENTRY_RECIPE,
 )
 from .coordinator import MieleConfigEntry
+from .recipe_flow import RecipeSubentryFlow
 
 LANGUAGES = ["auto", "de", "en", "fr", "it", "nl", "es", "pl", "sv", "da", "nb", "fi", "cs"]
 
@@ -104,6 +108,14 @@ class MieleFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domai
         if user_input is None:
             return self.async_show_form(step_id="reauth_confirm")
         return await self.async_step_user()
+
+    @classmethod
+    @callback
+    def async_get_supported_subentry_types(
+        cls, config_entry: ConfigEntry
+    ) -> dict[str, type[ConfigSubentryFlow]]:
+        """Recipes are managed as subentries ("Add recipe")."""
+        return {SUBENTRY_RECIPE: RecipeSubentryFlow}
 
     @staticmethod
     @callback

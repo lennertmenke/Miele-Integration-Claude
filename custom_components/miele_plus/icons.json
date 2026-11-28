@@ -39,6 +39,15 @@
       },
       "last_update": {
         "default": "mdi:update"
+      },
+      "temperature": {
+        "default": "mdi:thermometer"
+      },
+      "core_temperature": {
+        "default": "mdi:thermometer-probe"
+      },
+      "core_target_temperature": {
+        "default": "mdi:thermometer-check"
       }
     },
     "binary_sensor": {
@@ -64,6 +73,9 @@
       },
       "pause": {
         "default": "mdi:pause"
+      },
+      "recipe": {
+        "default": "mdi:chef-hat"
       }
     },
     "switch": {
@@ -79,6 +91,16 @@
     "event": {
       "activity": {
         "default": "mdi:bell-ring-outline"
+      }
+    },
+    "light": {
+      "light": {
+        "default": "mdi:lightbulb"
+      }
+    },
+    "number": {
+      "set_target_temperature": {
+        "default": "mdi:thermometer-lines"
       }
     }
   },

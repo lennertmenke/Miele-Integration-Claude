@@ -66,6 +66,7 @@ BINARY_SENSORS: tuple[MieleBinarySensorDescription, ...] = (
     ),
     MieleBinarySensorDescription(
         key="smart_grid",
+        exists_fn=lambda d: d.is_washer,
         translation_key="smart_grid",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,

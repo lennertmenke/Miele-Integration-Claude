@@ -42,6 +42,7 @@ from .const import (
     EVENT_PROGRAM_PAUSED,
     EVENT_PROGRAM_RESUMED,
     EVENT_PROGRAM_STARTED,
+    EVENT_TEMPERATURE_REACHED,
     FILLING_LEVELS_INTERVAL,
     HEALTHY_PUSH_POLL_INTERVAL,
     SIGNAL_DEVICE_EVENT,
@@ -78,6 +79,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
         )
         self.api = api
         self.options_snapshot = dict(entry.options)
+        self.subentry_snapshot = subentry_snapshot(entry)
         self.use_push: bool = entry.options.get(CONF_USE_PUSH, DEFAULT_USE_PUSH)
         self.power_off_on_finish: bool = entry.options.get(
             CONF_POWER_OFF_ON_FINISH, DEFAULT_POWER_OFF_ON_FINISH
@@ -94,6 +96,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
         self._actions_task: asyncio.Task | None = None
         self._programs_tried: dict[str, float] = {}
         self._filling_next = 0.0
+        self._temperature_reached: dict[str, float] = {}
         self.stats: dict[str, int] = {
             "polls": 0,
             "poll_errors": 0,
@@ -280,7 +283,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             if not isinstance(payload, dict):
                 continue
             if serial not in current and not _is_supported(payload):
-                # Miele Plus currently only handles washing machines
+                # Only washing machines and ovens are handled
                 continue
             existing = current.get(serial)
             if existing is None:
@@ -321,7 +324,7 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
                 events.append((EVENT_PROGRAM_PAUSED, {}))
             elif new_status == MieleStatus.PROGRAM_ENDED and old_status in active:
                 self._filling_next = 0.0
-                if self.power_off_on_finish:
+                if self.power_off_on_finish and new.is_washer:
                     self.config_entry.async_create_background_task(
                         self.hass, self._auto_power_off(new.serial), f"{DOMAIN}_power_off"
                     )
@@ -344,6 +347,9 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
                 events.append((EVENT_PROGRAM_ABORTED, {"duration": old.elapsed_minutes}))
             if new_status == MieleStatus.FAILURE:
                 events.append((EVENT_FAILURE, {}))
+
+        if new.is_oven:
+            self._detect_oven_temperature(old, new, events)
 
         if new.signal_failure and not old.signal_failure and new_status != MieleStatus.FAILURE:
             events.append((EVENT_FAILURE, {}))
@@ -370,6 +376,26 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             async_dispatcher_send(
                 self.hass, SIGNAL_DEVICE_EVENT.format(new.serial), event_type, data
             )
+
+    @callback
+    def _detect_oven_temperature(
+        self, old: MieleDevice, new: MieleDevice, events: list[tuple[str, dict[str, Any]]]
+    ) -> None:
+        """Fire 'temperature_reached' once per heating phase (preheating done)."""
+        serial = new.serial
+        target = new.target_temperature(0)
+        if new.status_raw != MieleStatus.RUNNING or not target:
+            self._temperature_reached.pop(serial, None)
+            return
+        if self._temperature_reached.get(serial) == target:
+            return
+        if old.target_temperature(0) != target:
+            # Target changed while running: arm again for the new temperature
+            self._temperature_reached.pop(serial, None)
+        current = new.temperature(0)
+        if current is not None and current >= target:
+            self._temperature_reached[serial] = target
+            events.append((EVENT_TEMPERATURE_REACHED, {"temperature": current, "target": target}))
 
     # ---------------------------------------------------------------- push
 
@@ -516,6 +542,11 @@ class MieleCoordinator(DataUpdateCoordinator[dict[str, MieleDevice]]):
             self._schedule_actions_refresh()
         else:
             await self.async_request_refresh()
+
+
+def subentry_snapshot(entry: ConfigEntry) -> dict[str, Any]:
+    """Comparable view of the recipe subentries (to detect changes)."""
+    return {sid: (sub.title, dict(sub.data)) for sid, sub in entry.subentries.items()}
 
 
 def _is_supported(payload: dict[str, Any]) -> bool:

@@ -119,16 +119,42 @@ class ProcessAction(IntEnum):
 
 
 class DeviceType(IntEnum):
-    """Appliance type codes (only washing machines are supported)."""
+    """Supported appliance type codes."""
 
     WASHING_MACHINE = 1
     WASHING_MACHINE_SEMI_PRO = 3
     WASHING_MACHINE_PRO = 5
+    OVEN = 12
+    OVEN_MICROWAVE = 13
+    STEAM_OVEN = 15
     WASHER_DRYER = 24
+    STEAM_OVEN_COMBI = 31  # e.g. DGC 7450
+    STEAM_OVEN_MICRO = 45
+    DIALOG_OVEN = 67
+    STEAM_OVEN_MK2 = 73
 
 
-# Miele Plus currently only handles washing machines; other appliances are ignored
-SUPPORTED_TYPES: Final = frozenset(DeviceType)
+WASHER_TYPES: Final = frozenset(
+    {
+        DeviceType.WASHING_MACHINE,
+        DeviceType.WASHING_MACHINE_SEMI_PRO,
+        DeviceType.WASHING_MACHINE_PRO,
+        DeviceType.WASHER_DRYER,
+    }
+)
+OVEN_TYPES: Final = frozenset(
+    {
+        DeviceType.OVEN,
+        DeviceType.OVEN_MICROWAVE,
+        DeviceType.STEAM_OVEN,
+        DeviceType.STEAM_OVEN_COMBI,
+        DeviceType.STEAM_OVEN_MICRO,
+        DeviceType.DIALOG_OVEN,
+        DeviceType.STEAM_OVEN_MK2,
+    }
+)
+# Washing machines and ovens are supported; other appliances are ignored
+SUPPORTED_TYPES: Final = WASHER_TYPES | OVEN_TYPES
 
 
 # Event types fired on the bus and by the event entities
@@ -141,6 +167,8 @@ EVENT_FAILURE: Final = "failure"
 EVENT_INFO: Final = "info"
 EVENT_DOOR_OPENED: Final = "door_opened"
 EVENT_DOOR_CLOSED: Final = "door_closed"
+EVENT_TEMPERATURE_REACHED: Final = "temperature_reached"
+EVENT_RECIPE_STARTED: Final = "recipe_started"
 EVENT_TYPES: Final = [
     EVENT_PROGRAM_STARTED,
     EVENT_PROGRAM_FINISHED,
@@ -151,6 +179,8 @@ EVENT_TYPES: Final = [
     EVENT_INFO,
     EVENT_DOOR_OPENED,
     EVENT_DOOR_CLOSED,
+    EVENT_TEMPERATURE_REACHED,
+    EVENT_RECIPE_STARTED,
 ]
 
 SERVICE_START_PROGRAM: Final = "start_program"
@@ -158,3 +188,15 @@ SERVICE_SET_START_TIME: Final = "set_start_time"
 SERVICE_SEND_ACTION: Final = "send_action"
 SERVICE_REFRESH: Final = "refresh"
 SERVICE_GET_PROGRAMS: Final = "get_programs"
+
+# Recipes are stored as config subentries of this type
+SUBENTRY_RECIPE: Final = "recipe"
+CONF_RECIPE_NAME: Final = "name"
+CONF_RECIPE_DEVICE: Final = "device"
+CONF_RECIPE_PROGRAM: Final = "program_id"
+CONF_RECIPE_PROGRAM_NAME: Final = "program_name"
+CONF_RECIPE_TEMPERATURE: Final = "temperature"
+CONF_RECIPE_DURATION: Final = "duration"
+CONF_RECIPE_CORE_TEMPERATURE: Final = "core_temperature"
+CONF_RECIPE_EXTRA: Final = "extra_parameters"
+CONF_RECIPE_NOTES: Final = "notes"

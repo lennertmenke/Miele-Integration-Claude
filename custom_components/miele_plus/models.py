@@ -8,8 +8,10 @@ from typing import Any
 
 from .const import (
     ACTIVE_STATES,
+    OVEN_TYPES,
     STATUS_KEYS,
     TEMPERATURE_NONE_THRESHOLD,
+    WASHER_TYPES,
     MieleStatus,
 )
 
@@ -98,6 +100,14 @@ class MieleDevice:
     @property
     def hw_version(self) -> str | None:
         return _get(self.ident, "xkmIdentLabel", "techType")
+
+    @property
+    def is_washer(self) -> bool:
+        return self.type_raw in WASHER_TYPES
+
+    @property
+    def is_oven(self) -> bool:
+        return self.type_raw in OVEN_TYPES
 
     # ------------------------------------------------------------ status
 
@@ -278,6 +288,47 @@ class MieleDevice:
     def filling_level(self, key: str) -> int | float | None:
         value = self.filling_levels.get(key)
         return value if isinstance(value, int | float) and not isinstance(value, bool) else None
+
+    # ------------------------------------------------------------- oven
+
+    def temperature(self, zone: int = 0) -> float | None:
+        """Current cavity temperature."""
+        return _temperature(_get(self.state, "temperature", zone))
+
+    @property
+    def core_temperature(self) -> float | None:
+        """Food probe temperature."""
+        return _temperature(_get(self.state, "coreTemperature", 0))
+
+    @property
+    def core_target_temperature(self) -> float | None:
+        return _temperature(_get(self.state, "coreTargetTemperature", 0))
+
+    @property
+    def light_on(self) -> bool | None:
+        value = self.state.get("light")
+        if value == 1:
+            return True
+        if value == 2:
+            return False
+        return None
+
+    def target_temperature_limits(self, zone: int = 0) -> tuple[float, float] | None:
+        """Adjustable target temperature range reported by the actions."""
+        for entry in self.actions.get("targetTemperature") or []:
+            if isinstance(entry, dict) and entry.get("zone") == zone + 1:
+                try:
+                    return float(entry["min"]), float(entry["max"])
+                except (KeyError, TypeError, ValueError):
+                    return None
+        return None
+
+    def program_info(self, program_id: int) -> dict[str, Any] | None:
+        """Program definition (incl. parameter ranges) from the programs list."""
+        for program in self.programs:
+            if program.get("programId") == program_id:
+                return program
+        return None
 
     @property
     def actions_age(self) -> float:

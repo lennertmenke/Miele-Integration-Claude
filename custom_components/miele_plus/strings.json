@@ -29,6 +29,68 @@
   "application_credentials": {
     "description": "Register an application at {developer_url} and use {redirect_url} as redirect URI."
   },
+  "config_subentries": {
+    "recipe": {
+      "initiate_flow": {
+        "user": "Add recipe"
+      },
+      "entry_type": "Recipe",
+      "step": {
+        "user": {
+          "title": "Choose oven",
+          "data": {
+            "device": "Oven"
+          }
+        },
+        "recipe": {
+          "title": "New recipe",
+          "description": "Pick a program and the baking parameters. Leave fields empty to use the oven's defaults.",
+          "data": {
+            "name": "Name",
+            "program_id": "Program",
+            "temperature": "Temperature",
+            "duration": "Duration",
+            "core_temperature": "Core temperature (food probe)",
+            "extra_parameters": "Extra API parameters (advanced)",
+            "notes": "Notes"
+          },
+          "data_description": {
+            "program_id": "Programs the oven offers for remote start. You can also enter a program number.",
+            "duration": "Optional, in minutes.",
+            "core_temperature": "Only if the program supports the food probe remotely.",
+            "extra_parameters": "Sent unchanged to Miele, e.g. for steam settings once known."
+          }
+        },
+        "reconfigure": {
+          "title": "Edit recipe",
+          "data": {
+            "name": "Name",
+            "program_id": "Program",
+            "temperature": "Temperature",
+            "duration": "Duration",
+            "core_temperature": "Core temperature (food probe)",
+            "extra_parameters": "Extra API parameters (advanced)",
+            "notes": "Notes"
+          },
+          "data_description": {
+            "program_id": "Programs the oven offers for remote start. You can also enter a program number.",
+            "duration": "Optional, in minutes.",
+            "core_temperature": "Only if the program supports the food probe remotely.",
+            "extra_parameters": "Sent unchanged to Miele, e.g. for steam settings once known."
+          }
+        }
+      },
+      "abort": {
+        "no_oven": "No Miele oven found. Recipes can be added once the oven is connected.",
+        "entry_not_loaded": "Miele Plus is not loaded.",
+        "reconfigure_successful": "Recipe updated"
+      },
+      "error": {
+        "invalid_program": "Choose a program from the list or enter its numeric ID.",
+        "invalid_extra": "Extra parameters must be a mapping, e.g. {\"steam\": 1}."
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
@@ -38,7 +100,7 @@
           "use_push": "Use push updates (event stream)",
           "poll_interval": "Polling interval when push is unavailable",
           "stale_grace": "Keep last known state on cloud errors for",
-          "power_off_on_finish": "Switch the washing machine off when the program ends (silences the end buzzer)",
+          "power_off_on_finish": "Switch washing machines off when the program ends (silences the end buzzer)",
           "power_off_delay": "Delay before switching off"
         },
         "data_description": {
@@ -116,6 +178,15 @@
       "water_total": {
         "name": "Water total"
       },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "core_temperature": {
+        "name": "Core temperature"
+      },
+      "core_target_temperature": {
+        "name": "Core target temperature"
+      },
       "twin_dos_1_level": {
         "name": "TwinDos 1 level"
       },
@@ -183,6 +254,19 @@
       },
       "pause": {
         "name": "Pause"
+      },
+      "recipe": {
+        "name": "Recipe: {recipe}"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Light"
+      }
+    },
+    "number": {
+      "set_target_temperature": {
+        "name": "Set target temperature"
       }
     },
     "switch": {
@@ -209,7 +293,9 @@
               "failure": "Failure",
               "info": "Information",
               "door_opened": "Door opened",
-              "door_closed": "Door closed"
+              "door_closed": "Door closed",
+              "temperature_reached": "Temperature reached",
+              "recipe_started": "Recipe started"
             }
           }
         }
@@ -222,6 +308,21 @@
     },
     "unknown_program": {
       "message": "Program '{program}' is not available on this appliance."
+    },
+    "device_offline": {
+      "message": "{device} is not reachable. Is it connected to Wi-Fi and powered?"
+    },
+    "power_on_not_allowed": {
+      "message": "{device} is off and cannot be switched on remotely. Enable remote control on the appliance or switch it on."
+    },
+    "power_on_failed": {
+      "message": "{device} did not switch on in time."
+    },
+    "core_temperature_unsupported": {
+      "message": "Program '{program}' does not accept a core temperature remotely."
+    },
+    "value_out_of_range": {
+      "message": "{field} {value} is outside the allowed range {min}–{max}."
     },
     "program_required": {
       "message": "Either program_id or program must be given."

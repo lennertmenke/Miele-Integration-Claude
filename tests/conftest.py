@@ -21,6 +21,7 @@ from custom_components.miele_plus.const import DOMAIN
 
 SERIAL_WM = "000123456789"
 SERIAL_FRIDGE = "000987654321"
+SERIAL_OVEN = "000111222333"
 
 
 def _temp(value: float | None) -> dict[str, Any]:
@@ -80,6 +81,56 @@ FRIDGE = {
     },
 }
 
+OVEN = {
+    "ident": {
+        "type": {"value_raw": 31, "value_localized": "Dampfgarer kombi"},
+        "deviceName": "Backofen",
+        "deviceIdentLabel": {"fabNumber": SERIAL_OVEN, "techType": "DGC7450"},
+        "xkmIdentLabel": {"techType": "EK039", "releaseVersion": "31.17"},
+    },
+    "state": {
+        "ProgramID": {"value_raw": 0, "value_localized": ""},
+        "status": {"value_raw": 2, "value_localized": "Ein"},
+        "programPhase": {"value_raw": 0, "value_localized": ""},
+        "remainingTime": [0, 0],
+        "elapsedTime": [0, 0],
+        "startTime": [0, 0],
+        "targetTemperature": [_temp(None), _temp(None), _temp(None)],
+        "temperature": [_temp(22), _temp(None), _temp(None)],
+        "coreTemperature": [{"value_raw": -32768}],
+        "coreTargetTemperature": [{"value_raw": -32768}],
+        "signalInfo": False,
+        "signalFailure": False,
+        "signalDoor": False,
+        "remoteEnable": {"fullRemoteControl": True, "smartGrid": False, "mobileStart": True},
+        "light": 2,
+    },
+}
+
+OVEN_ACTIONS = {
+    "processAction": [],
+    "light": [1, 2],
+    "powerOn": False,
+    "powerOff": True,
+    "targetTemperature": [],
+}
+
+OVEN_PROGRAMS = [
+    {
+        "programId": 13,
+        "program": "Heißluft plus",
+        "parameters": {
+            "temperature": {"min": 30, "max": 250, "step": 5, "mandatory": False},
+            "duration": {"min": [0, 1], "max": [12, 0], "mandatory": False},
+        },
+    },
+    {
+        "programId": 19,
+        "program": "Dampfgaren",
+        "parameters": {"temperature": {"min": 40, "max": 100, "step": 5}},
+    },
+]
+
 WASHER_ACTIONS = {
     "processAction": [2, 3],
     "light": [],
@@ -105,13 +156,25 @@ def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
 @pytest.fixture
 def devices() -> dict[str, Any]:
     """Raw device payload."""
-    return {SERIAL_WM: copy.deepcopy(WASHER), SERIAL_FRIDGE: copy.deepcopy(FRIDGE)}
+    return {
+        SERIAL_WM: copy.deepcopy(WASHER),
+        SERIAL_FRIDGE: copy.deepcopy(FRIDGE),
+        SERIAL_OVEN: copy.deepcopy(OVEN),
+    }
 
 
 @pytest.fixture
 def mock_api(devices: dict[str, Any]) -> Generator[dict[str, AsyncMock]]:
     """Patch the Miele API client."""
-    actions = {SERIAL_WM: WASHER_ACTIONS, SERIAL_FRIDGE: FRIDGE_ACTIONS}
+    actions = {
+        SERIAL_WM: WASHER_ACTIONS,
+        SERIAL_FRIDGE: FRIDGE_ACTIONS,
+        SERIAL_OVEN: OVEN_ACTIONS,
+    }
+    washer_programs = [
+        {"programId": 1, "program": "Baumwolle"},
+        {"programId": 3, "program": "Pflegeleicht"},
+    ]
     base = "custom_components.miele_plus.api.MieleApi"
     with (
         patch(
@@ -123,10 +186,9 @@ def mock_api(devices: dict[str, Any]) -> Generator[dict[str, AsyncMock]]:
         patch(
             f"{base}.get_programs",
             AsyncMock(
-                return_value=[
-                    {"programId": 1, "program": "Baumwolle"},
-                    {"programId": 3, "program": "Pflegeleicht"},
-                ]
+                side_effect=lambda s: copy.deepcopy(
+                    OVEN_PROGRAMS if s == SERIAL_OVEN else washer_programs
+                )
             ),
         ) as get_programs,
         patch(
